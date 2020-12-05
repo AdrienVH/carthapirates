@@ -1,5 +1,5 @@
 const { getBateaux, getBateau, getBateauxByLonLat, putBateau, deleteBateau } = require('./crud/bateaux')
-const { getPorts, getPort, getPortsByLonLat } = require('./crud/ports')
+const { getPorts, getPort, createPort, getPortsByLonLat } = require('./crud/ports')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -226,6 +226,46 @@ api.get('/ports/:identifiant', async (req, res) => {
 	const ports = await getPort(req.params.identifiant)
 	res.status(200).json(ports)
 })
+
+/**
+ * @swagger
+ *
+ * /ports/{identifiant}/{nom}/{longitude}/{latitude}:
+ *   post:
+ *     description: Crée un port
+ *     tags: [Ports]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: identifiant
+ *         description: Identifiant du port à créer
+ *         in: path
+ *         required: true
+ *         type: integer
+ *       - name: nom
+ *         description: Nom du port à créer
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: longitude
+ *         description: Longitude
+ *         in: path
+ *         required: true
+ *         type: number
+ *       - name: latitude
+ *         description: Latitude
+ *         in: path
+ *         required: true
+ *         type: number
+ *     responses:
+ *       201:
+ *         description: Le port a bien été créé
+ */
+api.post('/ports/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
+	const ports = await createPort(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+	res.status(201).json(ports)
+})
+
 
 /**
  * @swagger
