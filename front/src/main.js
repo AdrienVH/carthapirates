@@ -131,6 +131,7 @@ function addPortToMap(record) {
 	portsSource.addFeature(feature)
 }
 
+getPorts()
 
 /************ GET BATEAUX */
 
