@@ -1,0 +1,34 @@
+* {
+    padding:0;
+    margin:0;
+}
+
+body, html {
+    position:relative;
+    height:100%;
+    width:100%;
+}
+
+#map {
+    height:100%;
+    width:100%;
+}
+
+#xy {
+    display:none;
+}
+
+#stream {
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+}
+
+#stream p {
+    padding:5px 15px;
+    border:1px solid red;
+    background-color: rgba(255, 0, 0, 0.4);
+    border-radius: 4px;
+    font-family: Montserrat;
+    font-size: 12px;
+}

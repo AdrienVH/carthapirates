@@ -1,0 +1,14 @@
+version: "3"
+services:
+  front:
+    build: ./front/
+    ports:
+      - "9000:80"
+  api:
+    build: ./api/
+    ports:
+      - "9001:8080"
+  db:
+    build: ./db/
+    ports:
+      - "9002:5432" # Sert uniquement pour utiliser psql
