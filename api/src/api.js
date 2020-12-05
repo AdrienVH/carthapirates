@@ -1,5 +1,5 @@
-const { getMoyens, getMoyen, getMoyensByLonLat, putMoyen, deleteMoyen } = require('./crud/moyen')
-const { getSites, getSite, getSitesByLonLat } = require('./crud/site')
+const { getBateaux, getBateau, getBateauxByLonLat, putBateau, deleteBateau } = require('./crud/bateaux')
+const { getPorts, getPort, getPortsByLonLat } = require('./crud/ports')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -10,7 +10,7 @@ const api = express()
 const port = 8080
 const swaggerJSDocOptions = {
 	definition: {
-		info: { title: 'Documentation de l\'API de MyFirstApp', version: '1.2.3' },
+		info: { title: 'Documentation de l\'API', version: '1.0.0' },
 		servers: [{ url: "http://localhost:9001" }]
 	},
 	apis: ['./src/api.js'],
@@ -34,99 +34,128 @@ api.get('/stream', sse.init);
  * @swagger
  *
  * tags:
- *  name: Moyen
- *  description: Bateaux
+ *  name: Bateaux
  */
 
 /**
  * @swagger
  *
- * /moyen/{identifiant}:
- *   put:
- *     description: Modifie la localisation d'un moyen
- *     tags: [Moyen]
+ * /bateaux:
+ *   get:
+ *     description: Récupère la liste des bateaux
+ *     tags: [Bateaux]
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: La liste des bateaux a bien été récupérée
+ */
+api.get('/bateaux', async (req, res) => {
+	const bateaux = await getBateaux()
+	res.status(200).json(bateaux)
+})
+
+/**
+ * @swagger
+ *
+ * /bateaux/{identifiant}:
+ *   get:
+ *     description: Récupère un bateau
+ *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: identifiant
- *         description: Identifiant du moyen
+ *         description: Identifiant du bateau
  *         in: path
  *         required: true
- *         type: string
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: Le bateau a bien été récupéré
+ */
+api.get('/bateaux/:identifiant', async (req, res) => {
+	const bateaux = await getBateau(req.params.identifiant)
+	res.status(200).json(bateaux)
+})
+
+/**
+ * @swagger
+ *
+ * /bateaux/{identifiant}:
+ *   put:
+ *     description: Modifie la localisation d'un bateau
+ *     tags: [Bateaux]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: identifiant
+ *         description: Identifiant du bateau
+ *         in: path
+ *         required: true
+ *         type: integer
  *       - name: longitude
- *         description: Longitude de la nouvelle position du moyen
+ *         description: Longitude de la nouvelle position du bateau
  *         in: query
  *         required: true
  *         type: number
  *       - name: latitude
- *         description: Latitude de la nouvelle position du moyen
+ *         description: Latitude de la nouvelle position du bateau
  *         in: query
  *         required: true
  *         type: number
  *     responses:
  *       201:
- *         description: La localisation du moyen a bien été modifiée
+ *         description: La localisation du bateau a bien été modifiée
  */
-api.put('/moyen/:identifiant', async (req, res) => {
-	const moyen = await putMoyen(req.params.identifiant, req.query.longitude, req.query.latitude)
-	res.status(201).json(moyen)
-	sse.send(moyen);
+api.put('/bateaux/:identifiant', async (req, res) => {
+	const bateau = await putBateau(req.params.identifiant, req.query.longitude, req.query.latitude)
+	res.status(201).json(bateau)
+	sse.send(bateau);
 })
 
 /**
  * @swagger
  *
- * /moyens:
- *   get:
- *     description: Récupère la liste des moyens
- *     tags: [Moyen]
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: La liste des moyens a bien été récupérée
- */
-api.get('/moyens', async (req, res) => {
-	const moyens = await getMoyens()
-	res.status(200).json(moyens)
-})
-
-/**
- * @swagger
- *
- * /moyen/{identifiant}:
- *   get:
- *     description: Récupère un moyen
- *     tags: [Moyen]
+ * /bateaux/{identifiant}:
+ *   delete:
+ *     description: Supprime un bateau
+ *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: identifiant
- *         description: Identifiant du moyen
+ *         description: Identifiant du bateau
  *         in: path
  *         required: true
- *         type: string
+ *         type: integer
  *     responses:
  *       200:
- *         description: Le moyen a bien été récupéré
+ *         description: Le bateau a bien été supprimé
+ *       404:
+ *         description: Aucun bateau n'a été supprimé
  */
-api.get('/moyen/:identifiant', async (req, res) => {
-	const moyens = await getMoyen(req.params.identifiant)
-	res.status(200).json(moyens)
+api.delete('/bateaux/:identifiant', async (req, res) => {
+	const deleted = await deleteBateau(req.params.identifiant)
+	if(deleted == 1){
+		res.status(200).json("Le bateau a bien été supprimé")
+	}else{
+		res.status(404).json("Aucun bateau n'a été supprimé")
+	}
 })
 
 /**
  * @swagger
  *
- * /moyens/nearest/{nombre}/{longitude}/{latitude}:
+ * /bateaux/proches/{nombre}/{longitude}/{latitude}:
  *   get:
- *     description: Récupère le moyen le plus proche de coordonnées
- *     tags: [Moyen]
+ *     description: Récupère les bateaux les plus proches de coordonnées
+ *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: nombre
- *         description: Nombre de moyens à récupérer
+ *         description: Nombre de bateaux à récupérer
  *         in: path
  *         required: true
  *         type: integer
@@ -142,105 +171,74 @@ api.get('/moyen/:identifiant', async (req, res) => {
  *         type: number
  *     responses:
  *       200:
- *         description: Le moyen a bien été récupéré
+ *         description: Le bateau a bien été récupéré
  */
-api.get('/moyens/nearest/:nombre/:longitude/:latitude', async (req, res) => {
-	const moyens = await getMoyensByLonLat(req.params.longitude, req.params.latitude, req.params.nombre)
-	res.status(200).json(moyens)
-})
-
-/**
- * @swagger
- *
- * /moyen/{identifiant}:
- *   delete:
- *     description: Supprime un moyen
- *     tags: [Moyen]
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: identifiant
- *         description: Identifiant du moyen
- *         in: path
- *         required: true
- *         type: string
- *     responses:
- *       200:
- *         description: Le moyen a bien été supprimé
- *       404:
- *         description: Aucun moyen n'a été supprimé
- */
-api.delete('/moyen/:identifiant', async (req, res) => {
-	const deleted = await deleteMoyen(req.params.identifiant)
-	if(deleted == 1){
-		res.status(200).json("Le moyen a bien été supprimé")
-	}else{
-		res.status(404).json("Aucun moyen n'a été supprimé")
-	}
+api.get('/bateaux/proches/:nombre/:longitude/:latitude', async (req, res) => {
+	const bateaux = await getBateauxByLonLat(req.params.longitude, req.params.latitude, req.params.nombre)
+	res.status(200).json(bateaux)
 })
 
  /**
  * @swagger
  *
  * tags:
- *  name: Site
- *  description: Ports
+ *  name: Ports
  */
 
 /**
  * @swagger
  *
- * /sites:
+ * /ports:
  *   get:
- *     description: Récupère la liste des sites
- *     tags: [Site]
+ *     description: Récupère la liste des ports
+ *     tags: [Ports]
  *     produces:
  *       - application/json
  *     responses:
  *       200:
- *         description: La liste des sites a bien été récupérée
+ *         description: La liste des ports a bien été récupérée
  */
-api.get('/sites', async (req, res) => {
-	const sites = await getSites()
-	res.status(200).json(sites)
+api.get('/ports', async (req, res) => {
+	const ports = await getPorts()
+	res.status(200).json(ports)
 })
 
 /**
  * @swagger
  *
- * /site/{identifiant}:
+ * /ports/{identifiant}:
  *   get:
- *     description: Récupère un site
- *     tags: [Site]
+ *     description: Récupère un port
+ *     tags: [Ports]
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: identifiant
- *         description: Identifiant du site
+ *         description: Identifiant du port
  *         in: path
  *         required: true
- *         type: string
+ *         type: integer
  *     responses:
  *       200:
- *         description: Le site a bien été récupéré
+ *         description: Le port a bien été récupéré
  */
-api.get('/site/:identifiant', async (req, res) => {
-	const sites = await getSite(req.params.identifiant)
-	res.status(200).json(sites)
+api.get('/ports/:identifiant', async (req, res) => {
+	const ports = await getPort(req.params.identifiant)
+	res.status(200).json(ports)
 })
 
 /**
  * @swagger
  *
- * /sites/nearest/{nombre}/{longitude}/{latitude}:
+ * /ports/proches/{nombre}/{longitude}/{latitude}:
  *   get:
- *     description: Récupère les n sites les plus proches de coordonnées
- *     tags: [Site]
+ *     description: Récupère les ports les plus proches de coordonnées
+ *     tags: [Ports]
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: nombre
- *         description: Nombre de sites à récupérer
+ *         description: Nombre de ports à récupérer
  *         in: path
  *         required: true
  *         type: integer
@@ -256,9 +254,9 @@ api.get('/site/:identifiant', async (req, res) => {
  *         type: number
  *     responses:
  *       200:
- *         description: Les sites ont bien été récupérés
+ *         description: Les ports ont bien été récupérés
  */
-api.get('/sites/nearest/:nombre/:longitude/:latitude', async (req, res) => {
-	const sites = await getSitesByLonLat(req.params.longitude, req.params.latitude, req.params.nombre)
-	res.status(200).json(sites)
+api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
+	const ports = await getPortsByLonLat(req.params.longitude, req.params.latitude, req.params.nombre)
+	res.status(200).json(ports)
 })

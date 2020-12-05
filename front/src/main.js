@@ -10,9 +10,9 @@ var mapbox = new ol.layer.Tile({
 	name: "mapbox"
 });
 
-/***** SITES */
+/***** PORTS */
 
-function getSitesStyle(f){
+function getPortsStyle(f){
 	return new ol.style.Style({
 		image: new ol.style.RegularShape({
 			fill: new ol.style.Fill({color: "#405a82"}),
@@ -28,21 +28,20 @@ function getSitesStyle(f){
 	});
 }
 
-var sitesSource = new ol.source.Vector({projection : 'EPSG:3857'});
-var sites = new ol.layer.Vector({
-	source: sitesSource,
-	style: getSitesStyle,
-	name: "sites"
+var portsSource = new ol.source.Vector({projection : 'EPSG:3857'});
+var ports = new ol.layer.Vector({
+	source: portsSource,
+	style: getPortsStyle,
+	name: "ports"
 });
 
-/***** MOYENS */
+/***** BATEAUX */
 
-function getMoyensStyle(f){
+function getBateauxStyle(f){
 	return new ol.style.Style({
 		image: new ol.style.Icon({
 			src: 'bateau.png',
-			scale: 1,
-			//rotation: f.get("radians")
+			scale: 1
 		}),
 		text: new ol.style.Text({
 			offsetY: 25,
@@ -53,14 +52,14 @@ function getMoyensStyle(f){
 	});
 }
 
-var moyensSource = new ol.source.Vector({projection : 'EPSG:3857'});
-var moyens = new ol.layer.Vector({
-	source: moyensSource,
-	style: getMoyensStyle,
-	name: "moyens"
+var bateauxSource = new ol.source.Vector({projection : 'EPSG:3857'});
+var bateaux = new ol.layer.Vector({
+	source: bateauxSource,
+	style: getBateauxStyle,
+	name: "bateaux"
 });
 
-function getTrajetsStyle(f){
+/*function getTrajetsStyle(f){
 	return new ol.style.Style({
 		stroke: new ol.style.Stroke({color: 'red', width: 3})
 	});
@@ -71,12 +70,12 @@ var trajets = new ol.layer.Vector({
 	source: trajetsSource,
 	style: getTrajetsStyle,
 	name: "trajetsSource"
-});
+});*/
 
 var scaleLineControl = new ol.control.ScaleLine();
 
 var map = new ol.Map({
-	layers: [mapbox, trajets, sites, moyens],
+	layers: [mapbox, ports, bateaux],
 	target: document.getElementById('map'),
 	view: new ol.View({
 		center: ol.proj.transform([6.0, 40.0], 'EPSG:4326', 'EPSG:3857'),
@@ -105,17 +104,17 @@ map.on('singleclick', function (evt) {
 	$('#xy').hide();
 });
 
-/************ GET SITES */
+/************ GET PORTS */
 
-function getSites(){
+function getPorts(){
 	var request = $.ajax({
-		url: API_BASE_URL + "/sites",
+		url: API_BASE_URL + "/ports",
 		method: "GET"
 	});
 
 	request.done(function(records) {
 		for(i in records){
-			addSiteToMap(records[i]);
+			addPortToMap(records[i]);
 		}
 	});
 
@@ -124,28 +123,26 @@ function getSites(){
 	});
 }
 
-function addSiteToMap(record) {
+function addPortToMap(record) {
 	var feature = new ol.Feature({ });
 	feature.setId(record.id)
 	feature.set("nom", record.nom)
 	feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
-	sitesSource.addFeature(feature)
+	portsSource.addFeature(feature)
 }
 
-getSites()
 
+/************ GET BATEAUX */
 
-/************ GET MOYENS */
-
-function getMoyens(){
+function getBateaux(){
 	var request = $.ajax({
-		url: API_BASE_URL + "/moyens",
+		url: API_BASE_URL + "/bateaux",
 		method: "GET"
 	});
 
 	request.done(function(records) {
 		for(i in records){
-			addMoyenToMap(records[i]);
+			addBateauToMap(records[i]);
 		}
 	});
 
@@ -154,17 +151,15 @@ function getMoyens(){
 	});
 }
 
-function addMoyenToMap(record) {
+function addBateauToMap(record) {
 	var feature = new ol.Feature({ });
-	/*feature.set("degres", 0)
-	feature.set("radians", 0)*/
 	feature.setId(record.id)
 	feature.set("nom", record.nom)
 	feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
-	moyensSource.addFeature(feature)
+	bateauxSource.addFeature(feature)
 }
 
-getMoyens()
+getBateaux()
 
 // SSE
 
@@ -181,24 +176,18 @@ eventSource.onerror = event => {
   }
 };
 eventSource.onmessage = event => {
-	updateMoyen(JSON.parse(event.data))
+	updateBateau(JSON.parse(event.data))
 };
 
-function updateMoyen(modif) {
+function updateBateau(modif) {
 	const p = $('<p>Le bateau '+modif.id+' est à '+modif.geom.coordinates[0]+' , '+modif.geom.coordinates[1]+'</p>').appendTo('#stream')
 	window.setTimeout(() => {
 		p.fadeOut()
 	}, 3000);
 	// Update point feature on map
-	var moyen = moyensSource.getFeatureById(modif.id)
-	/*var point1 = modif.coordonnees[0]
-	var point2 = modif.coordonnees[1]
-	var degres = 180 - Math.atan2(point2[1] - point1[1], point2[0] - point1[0]) * 180 / Math.PI
-	moyen.set("degres", degres)
-	var radians = degres * (Math.PI / 180);
-	moyen.set("radians", radians)*/
-	var xyMoyen = ol.proj.transform(modif.geom.coordinates, 'EPSG:4326','EPSG:3857')
-	moyen.setGeometry(new ol.geom.Point(xyMoyen))
+	var bateau = bateauxSource.getFeatureById(modif.id)
+	var xyBateau = ol.proj.transform(modif.geom.coordinates, 'EPSG:4326','EPSG:3857')
+	bateau.setGeometry(new ol.geom.Point(xyBateau))
 	// Update line feature on map
 	/*var trajet = trajetsSource.getFeatureById(modif.id)
 	var line = new ol.geom.LineString(modif.coordonnees).transform('EPSG:4326','EPSG:3857')
