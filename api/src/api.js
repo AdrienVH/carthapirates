@@ -110,10 +110,17 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *     responses:
  *       201:
  *         description: Le bateau a bien été créé
+ *       500:
+ *         description: Une erreur est survenue
  */
 api.post('/bateaux/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
-	const bateau = await createBateau(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
-	res.status(201).json(bateau)
+	try {
+		const bateau = await createBateau(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+		res.status(201).json(bateau)
+	} catch (error) {
+		const erreurs = error.errors.map(err => err.message);
+		res.status(500).json({ code: 500, erreurs })
+	}
 })
 
 /**
@@ -297,10 +304,17 @@ api.get('/ports/:identifiant', async (req, res) => {
  *     responses:
  *       201:
  *         description: Le port a bien été créé
+ *       500:
+ *         description: Une erreur est survenue
  */
 api.post('/ports/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
-	const port = await createPort(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
-	res.status(201).json(port)
+	try {
+		const port = await createPort(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+		res.status(201).json(port)
+	} catch (error) {
+		const erreurs = error.errors.map(err => err.message);
+		res.status(500).json({ code: 500, erreurs })
+	}
 })
 
 /**
