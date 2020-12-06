@@ -40,11 +40,12 @@ async function getPortsByLonLat (lon, lat, limit) {
 
 async function createPort(id, nom, lon, lat) {
 	let sql = "INSERT INTO ports VALUES (:id, :nom, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326));"
-	const ports = await sequelize.query(sql, {
+	const port = await sequelize.query(sql, {
 		replacements: { id, nom, lon, lat },
 		type: QueryTypes.INSERT
 	})
-	return ports
+	.then(() => {return Port.findByPk(id)})
+	return port
 }
 
 async function deletePort(id) {

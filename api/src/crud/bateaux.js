@@ -41,11 +41,12 @@ async function getBateauxByLonLat (lon, lat, limit) {
 
 async function createBateau(id, nom, lon, lat) {
 	let sql = "INSERT INTO bateaux VALUES (:id, :nom, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), ARRAY[[:lon, :lat]]);"
-	const bateaux = await sequelize.query(sql, {
+	const bateau = await sequelize.query(sql, {
 		replacements: { id, nom, lon: parseFloat(lon), lat: parseFloat(lat) },
 		type: QueryTypes.INSERT
 	})
-	return bateaux
+	.then(() => {return Bateau.findByPk(id)})
+	return bateau.toJSON()
 }
 
 async function putBateau(id, lon, lat) {

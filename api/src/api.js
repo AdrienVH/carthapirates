@@ -112,8 +112,8 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *         description: Le bateau a bien été créé
  */
 api.post('/bateaux/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
-	const bateaux = await createBateau(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
-	res.status(201).json(bateaux)
+	const bateau = await createBateau(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+	res.status(201).json(bateau)
 })
 
 /**
@@ -299,8 +299,8 @@ api.get('/ports/:identifiant', async (req, res) => {
  *         description: Le port a bien été créé
  */
 api.post('/ports/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
-	const ports = await createPort(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
-	res.status(201).json(ports)
+	const port = await createPort(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+	res.status(201).json(port)
 })
 
 /**
