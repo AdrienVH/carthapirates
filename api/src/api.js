@@ -1,5 +1,5 @@
 const { getBateaux, getBateau, getBateauxByLonLat, putBateau, deleteBateau } = require('./crud/bateaux')
-const { getPorts, getPort, createPort, getPortsByLonLat } = require('./crud/ports')
+const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -21,9 +21,7 @@ const SwaggerOptions = { customCss: '.curl-command { display: none }' }
 api.use(express.json())
 api.use(cors())
 api.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions))
-api.listen(port, () => {
-	console.log('REST API is up')
-})
+api.listen(port, () => { console.log('REST API is up') })
 
 // SSE
 
@@ -266,6 +264,35 @@ api.post('/ports/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
 	res.status(201).json(ports)
 })
 
+/**
+ * @swagger
+ *
+ * /ports/{identifiant}:
+ *   delete:
+ *     description: Supprime un port
+ *     tags: [Ports]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: identifiant
+ *         description: Identifiant du port
+ *         in: path
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: Le port a bien été supprimé
+ *       404:
+ *         description: Aucun port n'a été supprimé
+ */
+api.delete('/ports/:identifiant', async (req, res) => {
+	const deleted = await deletePort(req.params.identifiant)
+	if(deleted == 1){
+		res.status(200).json("Le port a bien été supprimé")
+	}else{
+		res.status(404).json("Aucun port n'a été supprimé")
+	}
+})
 
 /**
  * @swagger

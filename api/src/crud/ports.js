@@ -47,6 +47,11 @@ async function createPort(id, nom, lon, lat) {
 	return ports
 }
 
+async function deletePort(id) {
+	const deleted = await Port.destroy({ where: { id } })
+	return deleted
+}
+
 // EXPORTS
 
-module.exports = { getPorts, getPort, createPort, getPortsByLonLat }
+module.exports = { getPorts, getPort, createPort, getPortsByLonLat, deletePort }
