@@ -1,4 +1,4 @@
-const { getBateaux, getBateau, getBateauxByLonLat, putBateau, deleteBateau } = require('./crud/bateaux')
+const { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, deleteBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const express = require('express')
 const cors = require('cors')
@@ -75,6 +75,45 @@ api.get('/bateaux', async (req, res) => {
 api.get('/bateaux/:identifiant', async (req, res) => {
 	const bateaux = await getBateau(req.params.identifiant)
 	res.status(200).json(bateaux)
+})
+
+/**
+ * @swagger
+ *
+ * /bateaux/{identifiant}/{nom}/{longitude}/{latitude}:
+ *   post:
+ *     description: Crée un bateau
+ *     tags: [Bateaux]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: identifiant
+ *         description: Identifiant du bateau à créer
+ *         in: path
+ *         required: true
+ *         type: integer
+ *       - name: nom
+ *         description: Nom du bateau à créer
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: longitude
+ *         description: Longitude
+ *         in: path
+ *         required: true
+ *         type: number
+ *       - name: latitude
+ *         description: Latitude
+ *         in: path
+ *         required: true
+ *         type: number
+ *     responses:
+ *       201:
+ *         description: Le bateau a bien été créé
+ */
+api.post('/bateaux/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
+	const bateaux = await createBateau(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+	res.status(201).json(bateaux)
 })
 
 /**

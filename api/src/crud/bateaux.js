@@ -39,6 +39,15 @@ async function getBateauxByLonLat (lon, lat, limit) {
 
 // COMMANDS
 
+async function createBateau(id, nom, lon, lat) {
+	let sql = "INSERT INTO bateaux VALUES (:id, :nom, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), ARRAY[[:lon, :lat]]);"
+	const bateaux = await sequelize.query(sql, {
+		replacements: { id, nom, lon: parseFloat(lon), lat: parseFloat(lat) },
+		type: QueryTypes.INSERT
+	})
+	return bateaux
+}
+
 async function putBateau(id, lon, lat) {
 	let sql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon,:lat),4326), coordonnees = array_cat(ARRAY[:lon,:lat]::float[][], coordonnees[1:2]) WHERE id = :id"
 	const bateau = await sequelize.query(sql, {
@@ -56,4 +65,4 @@ async function deleteBateau(id) {
 
 // EXPORTS
 
-module.exports = { getBateaux, getBateau, getBateauxByLonLat, putBateau, deleteBateau }
+module.exports = { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, deleteBateau }
