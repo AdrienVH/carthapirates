@@ -3,12 +3,15 @@ CREATE EXTENSION postgis;
 DROP TABLE IF EXISTS bateaux;
 CREATE TABLE bateaux (id integer CONSTRAINT pkey_bateaux_id PRIMARY KEY, nom text, geom geometry(POINT, 4326), coordonnees float[][]);
 
-INSERT INTO bateaux VALUES (1, 'Les Croustillants', ST_SetSRID(ST_MakePoint(6.0, 40.0), 4326), ARRAY[[6.0, 40.0]]);
-INSERT INTO bateaux VALUES (2, 'Les Shadoks', ST_SetSRID(ST_MakePoint(6.2, 40.2), 4326), ARRAY[[6.2, 40.2]]);
-INSERT INTO bateaux VALUES (3, 'Chocolatine ❤', ST_SetSRID(ST_MakePoint(6.4, 40.4), 4326), ARRAY[[6.4, 40.4]]);
-INSERT INTO bateaux VALUES (4, 'The Amazon Leaders', ST_SetSRID(ST_MakePoint(6.6, 40.6), 4326), ARRAY[[6.6, 40.6]]);
-INSERT INTO bateaux VALUES (5, 'LVMH ◆', ST_SetSRID(ST_MakePoint(6.8, 40.8), 4326), ARRAY[[6.8, 40.8]]);
-INSERT INTO bateaux VALUES (6, 'The Cosmo Girls', ST_SetSRID(ST_MakePoint(7.0, 41.0), 4326), ARRAY[[7.0, 41.0]]);
+INSERT INTO bateaux VALUES (1, 'L''Hermione', ST_SetSRID(ST_MakePoint(6.0, 40.0), 4326), ARRAY[[6.0, 40.0]]);
+INSERT INTO bateaux VALUES (2, 'Hisse et Oh', ST_SetSRID(ST_MakePoint(6.2, 40.2), 4326), ARRAY[[6.2, 40.2]]);
+INSERT INTO bateaux VALUES (3, 'Le TitaNick', ST_SetSRID(ST_MakePoint(6.4, 40.4), 4326), ARRAY[[6.4, 40.4]]);
+INSERT INTO bateaux VALUES (4, 'Le Cash-à-l''eau', ST_SetSRID(ST_MakePoint(6.6, 40.6), 4326), ARRAY[[6.6, 40.6]]);
+INSERT INTO bateaux VALUES (5, 'Rainbow Python Warrior', ST_SetSRID(ST_MakePoint(6.8, 40.8), 4326), ARRAY[[6.8, 40.8]]);
+INSERT INTO bateaux VALUES (6, 'L''Ovni', ST_SetSRID(ST_MakePoint(7.0, 41.0), 4326), ARRAY[[7.0, 41.0]]);
+INSERT INTO bateaux VALUES (7, 'Ever Given', ST_SetSRID(ST_MakePoint(7.0, 41.0), 4326), ARRAY[[7.2, 41.2]]);
+INSERT INTO bateaux VALUES (8, 'The Ranger', ST_SetSRID(ST_MakePoint(7.0, 41.0), 4326), ARRAY[[7.4, 41.4]]);
+
 
 DROP TABLE IF EXISTS ports;
 CREATE TABLE ports (id integer CONSTRAINT pkey_ports_id PRIMARY KEY, nom text, geom geometry(POINT, 4326));
