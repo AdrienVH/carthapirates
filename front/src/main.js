@@ -1,8 +1,16 @@
 const API_BASE_URL = "http://localhost:9001"
 
+let focusBateau = false
+let idBateau = null
+const url = new URLSearchParams(window.location.search)
+if (url.get('bateau') && !isNaN(parseInt(url.get('bateau')))) {
+	focusBateau = true
+	idBateau = parseInt(url.get('bateau'))
+}
+
 // MAP
 
-var mapbox = new ol.layer.Tile({
+const mapbox = new ol.layer.Tile({
 	source: new ol.source.XYZ({
 		tileSize: [256, 256],
 		url: 'https://api.mapbox.com/styles/v1/adrienvh/cki3g3bme2w2w19qyrxm4wry5/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWRyaWVudmgiLCJhIjoiU2lDV0N5cyJ9.2pFJAwvwZ9eBKKPiOrNWEw'
@@ -28,8 +36,8 @@ function getPortsStyle(f){
 	});
 }
 
-var portsSource = new ol.source.Vector({projection : 'EPSG:3857'});
-var ports = new ol.layer.Vector({
+const portsSource = new ol.source.Vector({projection : 'EPSG:3857'});
+const ports = new ol.layer.Vector({
 	source: portsSource,
 	style: getPortsStyle,
 	name: "ports"
@@ -41,61 +49,70 @@ function getBateauxStyle(f){
 	return new ol.style.Style({
 		image: new ol.style.Icon({
 			src: 'bateau.png',
-			scale: 1
+			scale: 1,
+			opacity: focusBateau && f.getId() != idBateau ? 0.5 : 1
 		}),
 		text: new ol.style.Text({
-			offsetY: 25,
-			text: f.get("nom"),
-			font: 'italic bold 13px sans-serif',
-			fill: new ol.style.Fill({color: 'black'})
+			textAlign: 'left',
+			offsetX: 20,
+			offsetY: 6,
+			text: focusBateau && f.getId() != idBateau ? "" : f.get("nom"),
+			font: "bold 30px 'Ms Madi'",
+			fill: new ol.style.Fill({color: 'dimgrey'}),
+			stroke: new ol.style.Stroke({color: 'white', width: 3}),
 		})
 	});
 }
 
-var bateauxSource = new ol.source.Vector({projection : 'EPSG:3857'});
-var bateaux = new ol.layer.Vector({
+const bateauxSource = new ol.source.Vector({projection : 'EPSG:3857'});
+const bateaux = new ol.layer.Vector({
 	source: bateauxSource,
 	style: getBateauxStyle,
 	name: "bateaux"
 });
 
-/*function getTrajetsStyle(f){
+/***** TRAJETS */
+
+function getTrajetsStyle(f){
 	return new ol.style.Style({
-		stroke: new ol.style.Stroke({color: 'red', width: 3})
+		stroke: new ol.style.Stroke({
+			color: focusBateau && f.get('idBateau') != idBateau ? "rgba(0, 0, 0, 0.1)" : "red",
+			width: focusBateau && f.get('idBateau') != idBateau ? 1 : 2
+		})
 	});
 }
 
-var trajetsSource = new ol.source.Vector({projection : 'EPSG:3857'});
-var trajets = new ol.layer.Vector({
+const trajetsSource = new ol.source.Vector({projection : 'EPSG:3857'});
+const trajets = new ol.layer.Vector({
 	source: trajetsSource,
 	style: getTrajetsStyle,
-	name: "trajetsSource"
-});*/
+	name: "trajets"
+});
 
-var scaleLineControl = new ol.control.ScaleLine();
+/***** MAP */
 
-var map = new ol.Map({
-	layers: [mapbox, ports, bateaux],
+const map = new ol.Map({
+	layers: [mapbox, trajets, ports, bateaux],
 	target: document.getElementById('map'),
 	view: new ol.View({
 		center: ol.proj.transform([6.0, 40.0], 'EPSG:4326', 'EPSG:3857'),
 		zoom: 6,
 		minZoom:6,
-		maxZoom:8
+		maxZoom:9
 	}),
 	controls : ol.control.defaults({
 		attribution : false,
 		zoom : false
-	}).extend([scaleLineControl])
+	}).extend([])
 })
 
 map.on('singleclick', function (evt) {
-	var xy = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326').map(c => c.toFixed(6)).join(",");
+	const xy = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326').map(c => c.toFixed(6)).join(",");
 	$('#xy').html(xy);
 	$('#xy').show();
-	var elm = document.getElementById("xy");
-	var selection = window.getSelection();
-    var range = document.createRange();
+	const elm = document.getElementById("xy");
+	const selection = window.getSelection();
+    const range = document.createRange();
     range.selectNodeContents(elm);
     selection.removeAllRanges();
     selection.addRange(range);
@@ -107,24 +124,22 @@ map.on('singleclick', function (evt) {
 /************ GET PORTS */
 
 function getPorts(){
-	var request = $.ajax({
+	const request = $.ajax({
 		url: API_BASE_URL + "/ports",
 		method: "GET"
-	});
-
+	})
 	request.done(function(records) {
-		for(i in records){
+		for(const i in records){
 			addPortToMap(records[i]);
 		}
-	});
-
+	})
 	request.fail(function(jqXHR, textStatus) {
 		console.log("FAIL", jqXHR, textStatus);
-	});
+	})
 }
 
 function addPortToMap(record) {
-	var feature = new ol.Feature({ });
+	const feature = new ol.Feature({ });
 	feature.setId(record.id)
 	feature.set("nom", record.nom)
 	feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
@@ -136,63 +151,110 @@ getPorts()
 /************ GET BATEAUX */
 
 function getBateaux(){
-	var request = $.ajax({
+	const request = $.ajax({
 		url: API_BASE_URL + "/bateaux",
 		method: "GET"
-	});
-
+	})
 	request.done(function(records) {
-		for(i in records){
-			addBateauToMap(records[i]);
+		for(const i in records){
+			addBateauToMap(records[i])
 		}
-	});
-
+	})
 	request.fail(function(jqXHR, textStatus) {
-		console.log("FAIL", jqXHR, textStatus);
-	});
+		console.log("FAIL", jqXHR, textStatus)
+	})
 }
 
 function addBateauToMap(record) {
-	var feature = new ol.Feature({ });
+	const feature = new ol.Feature({ });
 	feature.setId(record.id)
 	feature.set("nom", record.nom)
 	feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
 	bateauxSource.addFeature(feature)
 }
 
+function moveBateau(bateau) {
+	const feature = bateauxSource.getFeatureById(bateau.id)
+	feature.setGeometry(new ol.geom.Point(ol.proj.transform(bateau.geom.coordinates, 'EPSG:4326','EPSG:3857')))
+}
+
 getBateaux()
+
+/************ GET TRAJETS */
+
+function getTrajets(){
+	const request = $.ajax({
+		url: API_BASE_URL + "/trajets",
+		method: "GET"
+	})
+	request.done(function(records) {
+		for(const i in records){
+			addTrajetToMap(records[i]);
+		}
+	})
+	request.fail(function(jqXHR, textStatus) {
+		console.log("FAIL", jqXHR, textStatus);
+	})
+}
+
+function addTrajetToMap(record) {
+	const feature = new ol.Feature({ });
+	feature.set("idBateau", record.idBateau)
+	const geom = new ol.format.GeoJSON().readGeometry(record.geom, { featureProjection: "EPSG:3857" })
+	feature.setGeometry(geom)
+	trajetsSource.addFeature(feature)
+}
+
+getTrajets()
 
 // SSE
 
-const eventSource = new EventSource(API_BASE_URL + '/stream');
-eventSource.onopen = () => {
-	console.log('connected')
-};
-eventSource.onerror = event => {
-  if (eventSource.readyState === EventSource.CLOSED) {
-    console.log('closed')
-  }
-  if (eventSource.readyState === EventSource.CONNECTING) {
-    console.log('connecting')
-  }
-};
-eventSource.onmessage = event => {
-	updateBateau(JSON.parse(event.data))
-};
+const eventSource = new EventSource(API_BASE_URL + '/stream')
 
-function updateBateau(modif) {
-	const p = $('<p>Le bateau '+modif.id+' est à '+modif.geom.coordinates[0]+' , '+modif.geom.coordinates[1]+'</p>').appendTo('#stream')
-	window.setTimeout(() => {
-		p.fadeOut()
-	}, 3000);
-	// Update point feature on map
-	var bateau = bateauxSource.getFeatureById(modif.id)
-	var xyBateau = ol.proj.transform(modif.geom.coordinates, 'EPSG:4326','EPSG:3857')
-	bateau.setGeometry(new ol.geom.Point(xyBateau))
-	// Update line feature on map
-	/*var trajet = trajetsSource.getFeatureById(modif.id)
-	var line = new ol.geom.LineString(modif.coordonnees).transform('EPSG:4326','EPSG:3857')
-	trajet.setGeometry(line)*/
+eventSource.onopen = () => {
+	console.log("CONNECTED")
+}
+
+eventSource.onerror = () => {
+	switch (eventSource.readyState) {
+		case EventSource.OPENED:
+			console.log("OPENED")
+			break
+		case EventSource.CONNECTING:
+			console.log("CONNECTING")
+			break
+		case EventSource.CLOSED:
+			console.log("CLOSED")
+			break
+		default:
+			console.log("UNKNOWN EVENT")
+	}
+}
+
+eventSource.onmessage = event => {
+	const data = JSON.parse(event.data)
+	console.log("EVENT " + data.type)
+	console.log(data.content)
+	if(data.type == 'putBateau') {
+		const bateau = data.content.bateau
+		moveBateau(bateau)
+		const trajet = data.content.trajet
+		addTrajetToMap(trajet)
+		// Toaster
+		toaster(`Le bateau n°${bateau.id} s'est déplacé vers ${bateau.geom.coordinates.join(', ')}`)
+	} else if(data.type == 'deleteTrajets') {
+		const idBateau = data.content.idBateau
+		for(const f of trajetsSource.getFeatures()) {
+			if (f.get('idBateau') == idBateau) trajetsSource.removeFeature(f)
+		}
+		// Toaster
+		toaster(`Les trajets du bateau n°${idBateau} ont été supprimés`)
+	}
+}
+
+function toaster(message) {
+	const p = $(`<p>${message}</p>`).appendTo('#stream')
+	window.setTimeout(() => p.fadeOut(), 3000);
 }
 
 //eventSource.close();

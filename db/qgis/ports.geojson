@@ -1,0 +1,27 @@
+{
+"type": "FeatureCollection",
+"name": "ports",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3857" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "nom": "Marseille" }, "geometry": { "type": "Point", "coordinates": [ 596302.889942512614653, 5357384.452095557004213 ] } },
+{ "type": "Feature", "properties": { "id": 2, "nom": "Alger" }, "geometry": { "type": "Point", "coordinates": [ 341710.761718662979547, 4408328.77482792455703 ] } },
+{ "type": "Feature", "properties": { "id": 3, "nom": "Naples" }, "geometry": { "type": "Point", "coordinates": [ 1576291.781997109996155, 4983376.020169612951577 ] } },
+{ "type": "Feature", "properties": { "id": 4, "nom": "Palermo" }, "geometry": { "type": "Point", "coordinates": [ 1488323.780787541996688, 4597924.225594657473266 ] } },
+{ "type": "Feature", "properties": { "id": 5, "nom": "Melilla" }, "geometry": { "type": "Point", "coordinates": [ -325370.173665118927602, 4201997.429019858129323 ] } },
+{ "type": "Feature", "properties": { "id": 6, "nom": "Fiumicino" }, "geometry": { "type": "Point", "coordinates": [ 1362044.063626559218392, 5124473.845575321465731 ] } },
+{ "type": "Feature", "properties": { "id": 7, "nom": "Ibiza" }, "geometry": { "type": "Point", "coordinates": [ 161413.261650247965008, 4707357.536267922259867 ] } },
+{ "type": "Feature", "properties": { "id": 8, "nom": "Tunis" }, "geometry": { "type": "Point", "coordinates": [ 1141024.780631053959951, 4411265.91026268620044 ] } },
+{ "type": "Feature", "properties": { "id": 9, "nom": "Bejaia" }, "geometry": { "type": "Point", "coordinates": [ 565503.013229828560725, 4404317.063992944546044 ] } },
+{ "type": "Feature", "properties": { "id": 10, "nom": "Oran" }, "geometry": { "type": "Point", "coordinates": [ -70876.006593169542612, 4261133.585738836787641 ] } },
+{ "type": "Feature", "properties": { "id": 11, "nom": "Almeria" }, "geometry": { "type": "Point", "coordinates": [ -275099.404817784554325, 4415746.459172318689525 ] } },
+{ "type": "Feature", "properties": { "id": 12, "nom": "Cagliari" }, "geometry": { "type": "Point", "coordinates": [ 1013852.281153911026195, 4750959.034103954210877 ] } },
+{ "type": "Feature", "properties": { "id": 13, "nom": "Alicante" }, "geometry": { "type": "Point", "coordinates": [ -54355.117699970556714, 4626898.190887085162103 ] } },
+{ "type": "Feature", "properties": { "id": 14, "nom": "Valencia" }, "geometry": { "type": "Point", "coordinates": [ -35447.849616864856216, 4785495.818526267074049 ] } },
+{ "type": "Feature", "properties": { "id": 15, "nom": "Ajaccio" }, "geometry": { "type": "Point", "coordinates": [ 972799.919970780028962, 5149003.354739896021783 ] } },
+{ "type": "Feature", "properties": { "id": 16, "nom": "Bastia" }, "geometry": { "type": "Point", "coordinates": [ 1052185.533307971665636, 5266419.697085062973201 ] } },
+{ "type": "Feature", "properties": { "id": 17, "nom": "Nice" }, "geometry": { "type": "Point", "coordinates": [ 811032.638740079826675, 5418192.343870282173157 ] } },
+{ "type": "Feature", "properties": { "id": 18, "nom": "Livorno" }, "geometry": { "type": "Point", "coordinates": [ 1146807.10014829528518, 5396961.693716960027814 ] } },
+{ "type": "Feature", "properties": { "id": 19, "nom": "Barcelona" }, "geometry": { "type": "Point", "coordinates": [ 241428.243105728615774, 5064804.746207965537906 ] } },
+{ "type": "Feature", "properties": { "id": 20, "nom": "Palma de Mallorca" }, "geometry": { "type": "Point", "coordinates": [ 292249.720828605408315, 4800923.787703578360379 ] } }
+]
+}

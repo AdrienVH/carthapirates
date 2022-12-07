@@ -1,6 +1,7 @@
 * {
     padding:0;
     margin:0;
+    font-family: 'Ms Madi', cursive;
 }
 
 body, html {
@@ -18,17 +19,45 @@ body, html {
     display:none;
 }
 
+#link {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    padding:5px 10px;
+    color: rgba(64, 90, 130, 1);
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Share Tech Mono', monospace;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 4px;
+}
+
+#link a {
+    font-family: 'Share Tech Mono', monospace;
+    color: rgba(64, 90, 130, 1);
+    text-decoration: none;
+}
+
+#link a:hover {
+    text-decoration: underline;
+}
+
 #stream {
     position: absolute;
-    right: 30px;
-    bottom: 30px;
+    bottom: 15px;
+    right: 15px;
 }
 
 #stream p {
-    padding:5px 15px;
-    border:1px solid red;
-    background-color: rgba(255, 0, 0, 0.4);
-    border-radius: 4px;
-    font-family: Montserrat;
+    min-width: 350px;
+    margin-top:15px;
+    padding:5px 10px;
+    color: white;
     font-size: 12px;
+    font-weight: bold;
+    font-family: 'Share Tech Mono', monospace;
+    background-color: rgba(64, 90, 130, 0.8);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 4px;
 }

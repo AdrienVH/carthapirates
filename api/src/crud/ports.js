@@ -9,6 +9,7 @@ const sequelize = new Sequelize('myfirstdb', 'myfirstuser', 'myfirstpwd', {host:
 const Port = sequelize.define('Port', {
 	id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true },
 	nom: { type: DataTypes.STRING, allowNull: false },
+	nearestNode: { type: DataTypes.INTEGER, allowNull: false, field: 'nearest_node' },
 	geom: { type: DataTypes.GEOMETRY },
 }, {
 	timestamps: false,
@@ -27,13 +28,34 @@ async function getPort (id) {
 	return port.toJSON()
 }
 
-async function getPortsByLonLat (lon, lat, limit) {
-	let sql = "SELECT *, ST_Distance(St_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326), 3857), ST_Transform(geom, 3857)) AS distance FROM ports ORDER BY distance ASC LIMIT :limit"
-	const ports = await sequelize.query(sql, {
-		replacements: { lon, lat, limit },
-		type: QueryTypes.SELECT
-	})
+async function getPortsByLonLat(lon, lat, limit) {
+	let routingQuery = buildRoutingQuery(lon, lat)
+	let sql = `
+	WITH routes AS (${routingQuery})
+	SELECT ports.id, ports.nom, ports.geom, ROUND(routes.distance::numeric, 2) AS distance
+	FROM routes
+	LEFT JOIN ports ON routes.port_node = ports.nearest_node
+	ORDER BY routes.distance ASC
+	LIMIT :limit;
+	`
+	const ports = await sequelize.query(sql, { replacements: { limit }, type: QueryTypes.SELECT })
 	return ports
+}
+
+function buildRoutingQuery(lon, lat) {
+	const nearestNodeFromXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), the_geom) ASC LIMIT 1`
+	const nodesFromPorts = `SELECT array_agg(nearest_node) FROM ports`
+	const query = `
+	SELECT end_vid AS port_node, MAX(agg_cost) AS distance
+	FROM pgr_dijkstra(
+		'SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM postgis_01_routes',
+		(${nearestNodeFromXY}),
+		(${nodesFromPorts}),
+		FALSE
+	)
+	GROUP BY end_vid
+	`
+	return query
 }
 
 // COMMANDS

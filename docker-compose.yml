@@ -2,13 +2,28 @@ version: "3"
 services:
   front:
     build: ./front/
-    ports:
-      - "9000:80"
+    networks:
+      - ingress
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.carthapirates.rule=Host(`carthapirates.fr`)"
+      - "traefik.http.routers.carthapirates.entrypoints=websecure"
+      - "traefik.http.routers.carthapirates.tls.certresolver=letsencrypt"
   api:
     build: ./api/
-    ports:
-      - "9001:8080"
+    networks:
+      - ingress
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.carthapirates_api.rule=Host(`carthapirates.fr`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.carthapirates_api.entrypoints=websecure"
+      - "traefik.http.routers.carthapirates_api.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.carthapirates_api-stripapiprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.carthapirates_api.middlewares=carthapirates_api-stripapiprefix@docker"
   db:
     build: ./db/
-    ports:
-      - "9002:5432" # Sert uniquement pour utiliser psql
+networks:
+  ingress:
+    name: gateway_ingress
+    external: true

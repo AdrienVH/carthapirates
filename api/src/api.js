@@ -1,5 +1,6 @@
 const { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, deleteBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
+const { getTrajets, deleteTrajets } = require('./crud/trajets')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -153,9 +154,9 @@ api.post('/bateaux/:identifiant/:nom/:longitude/:latitude', async (req, res) => 
  *         description: La localisation du bateau a bien été modifiée
  */
 api.put('/bateaux/:identifiant', async (req, res) => {
-	const bateau = await putBateau(req.params.identifiant, req.query.longitude, req.query.latitude)
-	res.status(201).json(bateau)
-	sse.send(bateau);
+	const content = await putBateau(req.params.identifiant, req.query.longitude, req.query.latitude)
+	res.status(201).json(content.bateau)
+	sse.send({ type: 'putBateau', content })
 })
 
 /**
@@ -379,4 +380,61 @@ api.delete('/ports/:identifiant', async (req, res) => {
 api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
 	const ports = await getPortsByLonLat(req.params.longitude, req.params.latitude, req.params.nombre)
 	res.status(200).json(ports)
+})
+
+/**
+ * @swagger
+ *
+ * tags:
+ *  name: Trajets
+ */
+
+/**
+ * @swagger
+ *
+ * /trajets:
+ *   get:
+ *     description: Récupère la liste des trajets
+ *     tags: [Trajets]
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: La liste des trajets a bien été récupérée
+ */
+ api.get('/trajets', async (req, res) => {
+	const trajets = await getTrajets()
+	res.status(200).json(trajets)
+})
+
+/**
+ * @swagger
+ *
+ * /trajets/{identifiant}:
+ *   delete:
+ *     description: Supprime les trajets d'un bateau
+ *     tags: [Trajets]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: identifiant
+ *         description: Identifiant du bateau
+ *         in: path
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: Les trajets du bateau ont bien été supprimés
+ *       404:
+ *         description: Aucun trajet n'a été supprimé
+ */
+ api.delete('/trajets/:identifiant', async (req, res) => {
+	const idBateau = req.params.identifiant
+	const deleted = await deleteTrajets(idBateau)
+	if(deleted > 0){
+		res.status(200).json("Les " + deleted + " trajets du bateau " + idBateau + " ont bien été supprimés")
+	}else{
+		res.status(404).json("Aucun trajet n'a été supprimé")
+	}
+	sse.send({ type: 'deleteTrajets', content: { idBateau } })
 })

@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
+const { getTrajet } = require('./trajets')
 
 // DATABASE
 
@@ -9,8 +10,7 @@ const sequelize = new Sequelize('myfirstdb', 'myfirstuser', 'myfirstpwd', {host:
 const Bateau = sequelize.define('Bateau', {
 	id: { type: DataTypes.INTEGER, allowNull:false, primaryKey: true },
 	nom: { type: DataTypes.STRING, allowNull: false },
-	geom: { type: DataTypes.GEOMETRY },
-	coordonnees: { type: DataTypes.ARRAY(DataTypes.FLOAT) }
+	geom: { type: DataTypes.GEOMETRY }
 }, {
 	timestamps: false,
 	tableName: 'bateaux'
@@ -49,14 +49,33 @@ async function createBateau(id, nom, lon, lat) {
 	return bateau.toJSON()
 }
 
-async function putBateau(id, lon, lat) {
-	let sql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon,:lat),4326), coordonnees = array_cat(ARRAY[:lon,:lat]::float[][], coordonnees[1:2]) WHERE id = :id"
-	const bateau = await sequelize.query(sql, {
-		replacements: { id, lon: parseFloat(lon), lat: parseFloat(lat) },
-		type: QueryTypes.UPDATE
-	})
-	.then(() => {return Bateau.findByPk(id)})
-	return bateau.toJSON()
+async function putBateau(idBateau, lon, lat) {
+	// On récupère le bateau
+	let bateau = await Bateau.findByPk(idBateau)
+	const oldXy = bateau.toJSON().geom.coordinates
+	// On déplace le bateau
+	let sql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon,:lat),4326) WHERE id = :idBateau"
+	bateau = await sequelize.query(sql, { replacements: { idBateau, lon: parseFloat(lon), lat: parseFloat(lat) }, type: QueryTypes.UPDATE })
+	.then(() => {return Bateau.findByPk(idBateau)})
+	// On trace le trajet
+	const trajetGeom = buildRoutingQuery(oldXy, [lon, lat])
+	let trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, (${trajetGeom})) RETURNING id`
+	const returning = await sequelize.query(trajetSql, { type: QueryTypes.INSERT })
+	const idTrajet = returning[0][0].id
+	const trajet = await getTrajet(idTrajet)
+	// On retourne le bateau et le trajet
+	return { bateau: bateau.toJSON(), trajet: trajet }
+}
+
+function buildRoutingQuery(oldXY, newXY) {
+	const nearestNodeFromOldXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${oldXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
+	const nearestNodeFromNewXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${newXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
+	const query = `
+	SELECT ST_Union(wkb_geometry)
+	FROM pgr_dijkstra('SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM postgis_01_routes', (${nearestNodeFromOldXY}), (${nearestNodeFromNewXY}), FALSE) AS pgr
+	LEFT JOIN postgis_01_routes AS r ON pgr.edge = r.ogc_fid
+	`
+	return query
 }
 
 async function deleteBateau(id) {
