@@ -1,5 +1,5 @@
 from CarthaPirates import CarthaPirates
-carthapirates = CarthaPirates(5) # Indiquez le numéro du bateau
+carthapirates = CarthaPirates(0) # Indiquez le numéro du bateau
 
 for i in range(3):
 

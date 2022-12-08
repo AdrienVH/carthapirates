@@ -20,6 +20,9 @@ CREATE TABLE bateaux (
     CONSTRAINT fkey_bateaux_classes FOREIGN KEY(id_classe) REFERENCES classes(nom)
 );
 
+-- Enseignants
+INSERT INTO bateaux VALUES (0, 'El Professor',                  'carthageo2023', NULL);
+-- Etudiants
 INSERT INTO bateaux VALUES (1, 'PimpMyBoat',                    'carthageo2023', NULL);
 INSERT INTO bateaux VALUES (2, 'SQMer',                         'carthageo2023', NULL);
 INSERT INTO bateaux VALUES (3, 'Guin''anne''s Revenge',         'carthageo2023', NULL);

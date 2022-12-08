@@ -48,8 +48,7 @@ const ports = new ol.layer.Vector({
 function getBateauxStyle(f){
 	return new ol.style.Style({
 		image: new ol.style.Icon({
-			src: 'bateau.png',
-			scale: 1,
+			src: f.getId() == 0 ? 'bateau.png' : 'bateau.png',
 			opacity: focusBateau && f.getId() != idBateau ? 0.5 : 1
 		}),
 		text: new ol.style.Text({
