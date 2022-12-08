@@ -96,9 +96,9 @@ const map = new ol.Map({
 	target: document.getElementById('map'),
 	view: new ol.View({
 		center: ol.proj.transform([6.0, 40.0], 'EPSG:4326', 'EPSG:3857'),
+		minZoom: 6,
 		zoom: 6,
-		minZoom:6,
-		maxZoom:9
+		maxZoom: 9
 	}),
 	controls : ol.control.defaults({
 		attribution : false,
@@ -132,6 +132,7 @@ function getPorts(){
 		for(const i in records){
 			addPortToMap(records[i]);
 		}
+		map.getView().fit(portsSource.getExtent(), { padding: [100, 100, 100, 100] })
 	})
 	request.fail(function(jqXHR, textStatus) {
 		console.log("FAIL", jqXHR, textStatus);
