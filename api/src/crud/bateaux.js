@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, QueryTypes, Op } = require('sequelize')
+const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
 const { getTrajet } = require('./trajets')
 
 // DATABASE
@@ -19,7 +19,7 @@ const Bateau = sequelize.define('Bateau', {
 // QUERIES
 
 async function getBateaux () {
-	const bateaux = await Bateau.findAll({ where: { geom: { [Op.ne]: null } } })
+	const bateaux = await Bateau.findAll()
 	return bateaux.map(function(bateau){ return bateau.toJSON() })
 }
 
@@ -52,14 +52,17 @@ async function createBateau(id, nom, lon, lat) {
 async function putBateau(idBateau, lon, lat) {
 	// On récupère le bateau
 	let bateau = await Bateau.findByPk(idBateau)
-	const oldXy = bateau.toJSON().geom.coordinates
+	const oldXy = bateau.toJSON().geom ? bateau.toJSON().geom.coordinates : null
 	// On déplace le bateau
 	let sql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon,:lat),4326) WHERE id = :idBateau"
 	bateau = await sequelize.query(sql, { replacements: { idBateau, lon: parseFloat(lon), lat: parseFloat(lat) }, type: QueryTypes.UPDATE })
 	.then(() => {return Bateau.findByPk(idBateau)})
 	// On trace le trajet
-	const trajetGeom = buildRoutingQuery(oldXy, [lon, lat])
-	let trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, (${trajetGeom})) RETURNING id`
+	let trajetGeom = 'NULL'
+	if (oldXy) {
+		trajetGeom = `(${buildRoutingQuery(oldXy, [lon, lat])})`
+	}
+	let trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom}) RETURNING id`
 	const returning = await sequelize.query(trajetSql, { type: QueryTypes.INSERT })
 	const idTrajet = returning[0][0].id
 	const trajet = await getTrajet(idTrajet)

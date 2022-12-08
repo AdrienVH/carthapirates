@@ -1,9 +1,5 @@
 from CarthaPirates import CarthaPirates
-carthapirates = CarthaPirates(2) # Indiquez le numéro du bateau
-
-# Pour placer le bateau une première fois
-carthapirates.placerMonBateauDansUnPort()
-print("Les trajets ont été supprimés et le bateau a bien été déplacé dans un port. Regardez la carte !")
+carthapirates = CarthaPirates(5) # Indiquez le numéro du bateau
 
 for i in range(3):
 
@@ -25,7 +21,7 @@ for i in range(3):
 coords = carthapirates.recupererCoordsMonBateau()
 print("Les coordonnées du bateau sont", coords)
 
-# Pour rechercher les ports à proximité de coordonnées
+# Pour rechercher les n ports à proximité de coordonnées
 portsProches = carthapirates.trouverPortsProchesCoords(coords, 5) # On réutilise les coordonnées du bateau
 for port in portsProches:
   print("Port n°", port["id"], ":", port["nom"], "(situé à", port["distance"], "miles nautiques du bateau)")

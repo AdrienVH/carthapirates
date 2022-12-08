@@ -170,7 +170,9 @@ function addBateauToMap(record) {
 	const feature = new ol.Feature({ });
 	feature.setId(record.id)
 	feature.set("nom", record.nom)
-	feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
+	if (record.geom) {
+		feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
+	}
 	bateauxSource.addFeature(feature)
 }
 
@@ -201,8 +203,10 @@ function getTrajets(){
 function addTrajetToMap(record) {
 	const feature = new ol.Feature({ });
 	feature.set("idBateau", record.idBateau)
-	const geom = new ol.format.GeoJSON().readGeometry(record.geom, { featureProjection: "EPSG:3857" })
-	feature.setGeometry(geom)
+	if (record.geom) {
+		const geom = new ol.format.GeoJSON().readGeometry(record.geom, { featureProjection: "EPSG:3857" })
+		feature.setGeometry(geom)
+	}
 	trajetsSource.addFeature(feature)
 }
 

@@ -5,7 +5,6 @@ class CarthaPirates(object):
 
   def __init__(self, idBateau):
     self.monBateau = idBateau
-    self.init = False
     self.setApiUrl()
 
   def setApiUrl(self):
@@ -49,17 +48,3 @@ class CarthaPirates(object):
   def supprimerLesTrajetsDeMonBateau(self):
     url = self.url + "/trajets/" + str(self.monBateau)
     requests.delete(url)
-
-  def placerMonBateauDansUnPort(self):
-    self.listerTousLesPorts()
-    ports = self.listerTousLesPorts()
-    for port in ports:
-      print("Port n°", port["id"], ":", port["nom"])
-    idPortChoisi = str(input("\nDans quel port souhaitez-vous commencer votre aventure ? "))
-    coords = self.recupererCoordsPort(idPortChoisi)
-    self.placerMonBateauAuxCoords(coords)
-  
-  def placerMonBateauAuxCoords(self, coords):
-    self.deplacerMonBateauVersCoords(coords)
-    self.supprimerLesTrajetsDeMonBateau()
-    self.init = True
