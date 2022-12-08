@@ -20,14 +20,14 @@ CREATE TABLE bateaux (
     CONSTRAINT fkey_bateaux_classes FOREIGN KEY(id_classe) REFERENCES classes(nom)
 );
 
-INSERT INTO bateaux VALUES (1, 'PimpMyBoat',                    'carthageo2023', ST_SetSRID(ST_MakePoint(-0.869982, 37.027210), 4326));
-INSERT INTO bateaux VALUES (2, 'SQMer',                         'carthageo2023', ST_SetSRID(ST_MakePoint(2.409849, 37.828604), 4326));
-INSERT INTO bateaux VALUES (3, 'Guin''anne''s Revenge',         'carthageo2023', ST_SetSRID(ST_MakePoint(5.995090, 37.901985), 4326));
-INSERT INTO bateaux VALUES (4, 'L''Algonaute',                  'carthageo2023', ST_SetSRID(ST_MakePoint(12.342294, 39.138232), 4326));
-INSERT INTO bateaux VALUES (5, 'Le Pourfendeur de Bière',       'carthageo2023', ST_SetSRID(ST_MakePoint(4.381714, 42.450092), 4326));
-INSERT INTO bateaux VALUES (6, 'Pyrte-avion Charles de Gaulle', 'carthageo2023', ST_SetSRID(ST_MakePoint(2.570165, 40.580606), 4326));
-INSERT INTO bateaux VALUES (7, 'La Pynta',                      'carthageo2023', ST_SetSRID(ST_MakePoint(10.337215, 40.706392), 4326));
-INSERT INTO bateaux VALUES (8, 'πThon des Mers',                'carthageo2023', ST_SetSRID(ST_MakePoint(3.598341, 39.177989), 4326));
+INSERT INTO bateaux VALUES (1, 'PimpMyBoat',                    'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (2, 'SQMer',                         'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (3, 'Guin''anne''s Revenge',         'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (4, 'L''Algonaute',                  'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (5, 'Le Pourfendeur de Bière',       'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (6, 'Pyrte-avion Charles de Gaulle', 'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (7, 'La Pynta',                      'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (8, 'πThon des Mers',                'carthageo2023', NULL);
 
 --- PORTS ---
 

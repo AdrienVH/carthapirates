@@ -3,8 +3,8 @@ import requests
 
 class CarthaPirates(object):
 
-  def __init__(self, numBateau):
-    self.monBateau = numBateau
+  def __init__(self, idBateau):
+    self.monBateau = idBateau
     self.init = False
     self.setApiUrl()
 
@@ -23,8 +23,8 @@ class CarthaPirates(object):
 
   def deplacerMonBateauVersCoords(self, coords):
     url = self.url + '/bateaux/' + str(self.monBateau)
-    query = { "longitude": coords[0], "latitude": coords[1] }
-    requests.put(url, params=query)
+    params = { "longitude": coords[0], "latitude": coords[1] }
+    requests.put(url, params=params)
 
   def recupererCoordsPort(self, idPort):
     url = self.url + "/ports/" + str(idPort)

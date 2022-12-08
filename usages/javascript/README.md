@@ -1,4 +1,4 @@
-# Interagir avec la carte en Python
+# Interagir avec la carte en Javascript
 
 ![](../../carte_interactive.png "Carte interactive")
 
@@ -8,12 +8,12 @@ Si vous voulez focaliser la carte interactive sur un seul bateau : https://carth
 
 Pour rappel, l’utilisation de la carte interactive au travers de votre programme n’est pas obligatoire ! Par contre, si vous décidez de l'utiliser, sachez que cela nécessite d’être connecté à Internet pendant tout le temps d'éxécution de votre programme.
 
-Afin de vous aider à utiliser la carte, vous trouverez dans ce dossier "python" deux fichiers .py mis à votre disposition :
+Afin de vous aider à utiliser la carte, vous trouverez dans ce dossier "javascript" deux fichiers .js mis à votre disposition :
 
-**Fichier CarthaPirates.py**
+**Fichier CarthaPirates.js**
 
 Ce premier fichier est à ajouter à votre projet, au même endroit que les autres classes de votre projet (Navire, Equipage, Navigateur, etc.), de préférence à la racine du répertoire de votre projet.
 
-**Fichier exemple.py**
+**Fichier exemple.html**
 
 Ce second fichier vous montre comment vous devez importer la classe CarthaPirates. Il vous montre aussi comment utiliser cette les méthodes de cette classe CarthaPirates au sein de votre programme, et ce afin d'interagir avec votre bateau au sein de la carte interactive.

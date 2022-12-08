@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
+const { Sequelize, DataTypes, QueryTypes, Op } = require('sequelize')
 const { getTrajet } = require('./trajets')
 
 // DATABASE
@@ -19,7 +19,7 @@ const Bateau = sequelize.define('Bateau', {
 // QUERIES
 
 async function getBateaux () {
-	const bateaux = await Bateau.findAll()
+	const bateaux = await Bateau.findAll({ where: { geom: { [Op.ne]: null } } })
 	return bateaux.map(function(bateau){ return bateau.toJSON() })
 }
 

@@ -37,7 +37,7 @@ L'application est hébergée en France ([ScaleWay](https://www.scaleway.com/fr/)
 
 ## Utilisation de l'API
 
-L'API de l'application Web n'est pas sécurisée
+L'API de l'application Web n'est pas sécurisée. Si l'application est démarrée, l'accès est ouvert à tous.
 
 ### Python
 

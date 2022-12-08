@@ -1,0 +1,58 @@
+class CarthaPirates {
+    
+    constructor(idBateau) {
+        this.monBateau = idBateau
+        this.init = false
+        this.setApiUrl()
+    }
+
+    setApiUrl() {
+        const isDev = true // FIX ME
+        if (isDev) {
+            this.url = 'http://localhost:9001'
+        } else {
+            this.url = 'https://carthapirates.fr/api'
+        }
+    }
+
+    async listerTousLesPorts() {
+        const url = this.url + '/ports'
+        const response = await fetch(url)
+        return await response.json()
+    }
+
+    async deplacerMonBateauVersCoords(coords) {
+        const params = new URLSearchParams({ longitude: coords[0], latitude: coords[1] })
+        const url = this.url + '/bateaux/' + this.monBateau + '?' + params
+        return fetch(url, { method: 'PUT'})
+    }
+
+    async recupererCoordsPort(idPort) {
+        const url = this.url + '/ports/' + idPort
+        const response = await fetch(url)
+        return await response.json()
+    }
+
+    async recupererCoordsMonBateau() {
+        const url = this.url + '/bateaux/' + this.monBateau
+        const response = await fetch(url)
+        return await response.json()
+    }
+
+    async trouverPortsProchesCoords(coords, nombre) {
+        const url = this.url + '/ports/proches/' + nombre + '/' + coords[0] + '/' + coords[1]
+        const response = await fetch(url)
+        return await response.json()
+    }
+
+    async trouverBateauxProchesCoords(coords, nombre) {
+        const url = this.url + '/bateaux/proches/' + nombre + '/' + coords[0] + '/' + coords[1]
+        const response = await fetch(url)
+        return await response.json()
+    }
+
+    async supprimerLesTrajetsDeMonBateau() {
+        const url = this.url + '/trajets/' + this.monBateau
+        return fetch(url, { method: 'DELETE'})
+    }
+}
