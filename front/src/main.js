@@ -239,20 +239,32 @@ eventSource.onmessage = event => {
 	const data = JSON.parse(event.data)
 	console.log("EVENT " + data.type)
 	console.log(data.content)
-	if(data.type == 'putBateau') {
+	if(data.type == 'deplacerBateau') {
 		const bateau = data.content.bateau
 		moveBateau(bateau)
 		const trajet = data.content.trajet
 		addTrajetToMap(trajet)
 		// Toaster
 		toaster(`Le bateau n°${bateau.id} s'est déplacé vers ${bateau.geom.coordinates.join(', ')}`)
-	} else if(data.type == 'deleteTrajets') {
+	} else if(data.type == 'supprimerTrajets') {
 		const idBateau = data.content.idBateau
 		for(const f of trajetsSource.getFeatures()) {
 			if (f.get('idBateau') == idBateau) trajetsSource.removeFeature(f)
 		}
 		// Toaster
 		toaster(`Les trajets du bateau n°${idBateau} ont été supprimés`)
+	} else if(data.type == 'rentrerBateau') {
+		const idBateau = data.content.idBateau
+		for(const f of bateauxSource.getFeatures()) {
+			if (f.getId() == idBateau) f.setGeometry(null)
+		}
+		// Toaster
+		toaster(`Le bateau n°${idBateau} a été retiré de la carte`)
+		for(const f of trajetsSource.getFeatures()) {
+			if (f.get('idBateau') == idBateau) trajetsSource.removeFeature(f)
+		}
+		// Toaster
+		toaster(`Les trajets du bateau n°${idBateau} ont été retirés de la carte`)
 	}
 }
 

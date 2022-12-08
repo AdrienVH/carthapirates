@@ -70,6 +70,13 @@ async function putBateau(idBateau, lon, lat) {
 	return { bateau: bateau.toJSON(), trajet: trajet }
 }
 
+async function rentrerBateau(idBateau) {
+	let sql = "UPDATE bateaux SET geom = NULL WHERE id = :idBateau"
+	const bateau = await sequelize.query(sql, { replacements: { idBateau }, type: QueryTypes.UPDATE })
+	.then(() => {return Bateau.findByPk(idBateau)})
+	return bateau
+}
+
 function buildRoutingQuery(oldXY, newXY) {
 	const nearestNodeFromOldXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${oldXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
 	const nearestNodeFromNewXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${newXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
@@ -88,4 +95,4 @@ async function deleteBateau(id) {
 
 // EXPORTS
 
-module.exports = { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, deleteBateau }
+module.exports = { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, rentrerBateau, deleteBateau }

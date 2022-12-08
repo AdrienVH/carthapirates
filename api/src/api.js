@@ -1,4 +1,4 @@
-const { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, deleteBateau } = require('./crud/bateaux')
+const { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, rentrerBateau, deleteBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const { getTrajets, deleteTrajets } = require('./crud/trajets')
 const express = require('express')
@@ -156,7 +156,34 @@ api.post('/bateaux/:identifiant/:nom/:longitude/:latitude', async (req, res) => 
 api.put('/bateaux/:identifiant', async (req, res) => {
 	const content = await putBateau(req.params.identifiant, req.query.longitude, req.query.latitude)
 	res.status(201).json(content.bateau)
-	sse.send({ type: 'putBateau', content })
+	sse.send({ type: 'deplacerBateau', content })
+})
+
+/**
+ * @swagger
+ *
+ * /bateaux/{identifiant}/rentrer:
+ *   put:
+ *     description: Retire la localisation d'un bateau
+ *     tags: [Bateaux]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: identifiant
+ *         description: Identifiant du bateau
+ *         in: path
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       201:
+ *         description: La localisation du bateau a bien été retirée
+ */
+ api.put('/bateaux/:identifiant/rentrer', async (req, res) => {
+	const idBateau = req.params.identifiant
+	await rentrerBateau(idBateau)
+	await deleteTrajets(idBateau)
+	res.status(201).json('Le bateau a bien été retiré')
+	sse.send({ type: 'rentrerBateau', content: { idBateau } })
 })
 
 /**
@@ -436,5 +463,5 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
 	}else{
 		res.status(404).json("Aucun trajet n'a été supprimé")
 	}
-	sse.send({ type: 'deleteTrajets', content: { idBateau } })
+	sse.send({ type: 'supprimerTrajets', content: { idBateau } })
 })

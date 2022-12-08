@@ -48,3 +48,7 @@ class CarthaPirates(object):
   def supprimerLesTrajetsDeMonBateau(self):
     url = self.url + "/trajets/" + str(self.monBateau)
     requests.delete(url)
+
+  def rentrerMonBateau(self):
+    url = self.url + '/bateaux/' + str(self.monBateau) + '/rentrer'
+    requests.put(url)

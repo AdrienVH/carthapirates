@@ -25,3 +25,7 @@ print("Les coordonnées du bateau sont", coords)
 portsProches = carthapirates.trouverPortsProchesCoords(coords, 5) # On réutilise les coordonnées du bateau
 for port in portsProches:
   print("Port n°", port["id"], ":", port["nom"], "(situé à", port["distance"], "miles nautiques du bateau)")
+
+# Pour retirer le bateau de la carte
+carthapirates.rentrerMonBateau()
+print("Le bateau et ses trajets ont bien été déplacés. Regardez la carte !")
