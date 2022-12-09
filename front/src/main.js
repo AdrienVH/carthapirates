@@ -1,4 +1,8 @@
-const API_BASE_URL = window.location.hostname == 'carthapirates.fr' ? 'https://carthapirates.fr/api' : 'http://localhost:9001'
+const isProd = window.location.hostname == 'carthapirates.fr' ? true : false
+
+const API_BASE_URL = isProd ? 'https://carthapirates.fr/api' : 'http://localhost:9001'
+
+if (isProd) $('#ribbon').hide()
 
 let focusBateau = false
 let idBateau = null
