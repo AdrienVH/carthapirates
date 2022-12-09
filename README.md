@@ -1,8 +1,8 @@
-# carthageo-algopython-webapp
+# CarthaPirates
 
 ![](carte_interactive.png "Carte interactive")
 
-Cette application est utilisée dans le cadre des cours d'Algorithmie et de Programmation assurés au sein du Master 2 Carthagéo :
+CarthaPirates est une application web utilisée dans le cadre des cours d'Algorithmie et de Programmation assurés au sein du Master 2 Carthagéo :
 * Université Panthéon-Sorbonne (Paris 1)
 * Université de Paris Cité (Paris 7)
 * École Nationale des Sciences Géographiques (ENSG)
@@ -11,7 +11,7 @@ Cette application est utilisée dans le cadre des cours d'Algorithmie et de Prog
 
 ### Dans un contexte de développement
 
-Arrêter et nettoyer l'environnement avec la commande `make cleanDev`.
+Arrêter et nettoyer l'environnement de développement avec la commande `make cleanDev`.
 
 Puis, démarrer l'application avec la commande `make startDev` ou `make watchDev`.
 
@@ -24,7 +24,7 @@ Puis, démarrer l'application avec la commande `make startDev` ou `make watchDev
 
 ### Dans un contexte de production
 
-Arrêter et nettoyer l'environnement avec la commande `make clean`.
+Arrêter et nettoyer l'environnement de production avec la commande `make clean`.
 
 Puis, démarrer l'application avec la commande `make start` ou `make watch`.
 
