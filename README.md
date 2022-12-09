@@ -34,19 +34,3 @@ Puis, démarrer l'application avec la commande `make start` ou `make watch`.
   * API consommant la base de données (Node.js, Express, SwaggerUI)
 
 L'application est hébergée en France ([ScaleWay](https://www.scaleway.com/fr/)).
-
-## Utilisation de l'API (Production)
-
-L'API de l'application Web n'est pas sécurisée. Si l'application est démarrée, l'accès est ouvert à tous.
-
-### Swagger UI
-
-Afin de consommer l'API via Swagger UI, utilisez [cette interface](https://carthapirates.fr/api/documentation/)
-
-### Python
-
-Afin de consommer l'API en Python, consultez le dossier [usages/python](./usages/python)
-
-### Javascript
-
-Afin de consommer l'API en Javascript, consultez le dossier [usages/javascript](./usages/javascript)
