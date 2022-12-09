@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, Op } = require('sequelize')
+const { Sequelize, DataTypes, QueryTypes, Op } = require('sequelize')
 
 // DATABASE
 
@@ -19,18 +19,23 @@ const Trajet = sequelize.define('Trajet', {
 // QUERIES
 
 async function getTrajets () {
-	const trajets = await Trajet.findAll({ where: { geom: { [Op.ne]: null } } })
-	return trajets.map(function(trajet){ return trajet.toJSON() })
+	const sql = `
+	SELECT id, id_bateau, date, ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC) AS ordre
+	FROM trajets
+	WHERE geom IS NOT NULL;
+	`
+	const trajets = await sequelize.query(sql, { type: QueryTypes.SELECT })
+	return trajets
 }
 
 async function getTrajet (id) {
 	const trajet = await Trajet.findByPk(id)
-	return trajet.toJSON()
+	return trajet
 }
 
 // COMMANDS
 
-async function deleteTrajets(idBateau) {
+async function deleteTrajets (idBateau) {
 	const deleted = await Trajet.destroy({ where: { idBateau } })
 	return deleted
 }

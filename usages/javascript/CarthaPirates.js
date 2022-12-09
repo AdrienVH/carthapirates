@@ -51,8 +51,8 @@ class CarthaPirates {
         return await response.json()
     }
 
-    async supprimerLesTrajetsDeMonBateau() {
-        const url = this.url + '/trajets/' + this.monBateau
-        return fetch(url, { method: 'DELETE'})
+    async rentrerMonBateau() {
+        const url = this.url + '/bateaux/' + this.monBateau + '/rentrer'
+        return fetch(url, { method: 'PUT'})
     }
 }

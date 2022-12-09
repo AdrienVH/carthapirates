@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:9001"
+const API_BASE_URL = window.location.hostname == 'carthapirates.fr' ? 'https://carthapirates.fr/api' : 'http://localhost:9001'
 
 let focusBateau = false
 let idBateau = null
@@ -123,13 +123,10 @@ map.on('singleclick', function (evt) {
 /************ GET PORTS */
 
 function getPorts(){
-	const request = $.ajax({
-		url: API_BASE_URL + "/ports",
-		method: "GET"
-	})
+	const request = $.ajax({ url: API_BASE_URL + "/ports", method: "GET" })
 	request.done(function(records) {
-		for(const i in records){
-			addPortToMap(records[i]);
+		for(const port of records){
+			addPortToMap(port)
 		}
 		map.getView().fit(portsSource.getExtent(), { padding: [100, 100, 100, 100] })
 	})
@@ -151,13 +148,10 @@ getPorts()
 /************ GET BATEAUX */
 
 function getBateaux(){
-	const request = $.ajax({
-		url: API_BASE_URL + "/bateaux",
-		method: "GET"
-	})
+	const request = $.ajax({ url: API_BASE_URL + "/bateaux",method: "GET" })
 	request.done(function(records) {
-		for(const i in records){
-			addBateauToMap(records[i])
+		for(const bateau of records){
+			addBateauToMap(bateau)
 		}
 	})
 	request.fail(function(jqXHR, textStatus) {
@@ -185,13 +179,10 @@ getBateaux()
 /************ GET TRAJETS */
 
 function getTrajets(){
-	const request = $.ajax({
-		url: API_BASE_URL + "/trajets",
-		method: "GET"
-	})
+	const request = $.ajax({ url: API_BASE_URL + "/trajets", method: "GET" })
 	request.done(function(records) {
-		for(const i in records){
-			addTrajetToMap(records[i]);
+		for (const trajet of records) {
+			addTrajetToMap(trajet);
 		}
 	})
 	request.fail(function(jqXHR, textStatus) {
@@ -199,11 +190,12 @@ function getTrajets(){
 	})
 }
 
-function addTrajetToMap(record) {
+function addTrajetToMap(trajet) {
 	const feature = new ol.Feature({ });
-	feature.set("idBateau", record.idBateau)
-	if (record.geom) {
-		const geom = new ol.format.GeoJSON().readGeometry(record.geom, { featureProjection: "EPSG:3857" })
+	feature.set("idBateau", trajet.idBateau)
+	feature.set("ordre", trajet.ordre)
+	if (trajet.geom) {
+		const geom = new ol.format.GeoJSON().readGeometry(trajet.geom, { featureProjection: "EPSG:3857" })
 		feature.setGeometry(geom)
 	}
 	trajetsSource.addFeature(feature)
@@ -211,7 +203,13 @@ function addTrajetToMap(record) {
 
 getTrajets()
 
-// SSE
+function retirerTrajets(idBateau){
+	for (const f of trajetsSource.getFeatures()) {
+		if (f.get('idBateau') == idBateau) trajetsSource.removeFeature(f)
+	}
+}
+
+/************ SSE */
 
 const eventSource = new EventSource(API_BASE_URL + '/stream')
 
@@ -239,32 +237,28 @@ eventSource.onmessage = event => {
 	const data = JSON.parse(event.data)
 	console.log("EVENT " + data.type)
 	console.log(data.content)
-	if(data.type == 'deplacerBateau') {
-		const bateau = data.content.bateau
-		moveBateau(bateau)
-		const trajet = data.content.trajet
-		addTrajetToMap(trajet)
-		// Toaster
-		toaster(`Le bateau n°${bateau.id} s'est déplacé vers ${bateau.geom.coordinates.join(', ')}`)
-	} else if(data.type == 'supprimerTrajets') {
-		const idBateau = data.content.idBateau
-		for(const f of trajetsSource.getFeatures()) {
-			if (f.get('idBateau') == idBateau) trajetsSource.removeFeature(f)
-		}
-		// Toaster
-		toaster(`Les trajets du bateau n°${idBateau} ont été supprimés`)
-	} else if(data.type == 'rentrerBateau') {
-		const idBateau = data.content.idBateau
-		for(const f of bateauxSource.getFeatures()) {
-			if (f.getId() == idBateau) f.setGeometry(null)
-		}
-		// Toaster
-		toaster(`Le bateau n°${idBateau} a été retiré de la carte`)
-		for(const f of trajetsSource.getFeatures()) {
-			if (f.get('idBateau') == idBateau) trajetsSource.removeFeature(f)
-		}
-		// Toaster
-		toaster(`Les trajets du bateau n°${idBateau} ont été retirés de la carte`)
+
+	switch (data.type) {
+		case 'deplacerBateau':
+			const bateau = data.content.bateau
+			const trajet = data.content.trajet
+			// Actions
+			moveBateau(bateau)
+			addTrajetToMap(trajet)
+			// Toaster
+			toaster(`Le bateau n°${bateau.id} s'est déplacé vers ${bateau.geom.coordinates.join(', ')}`)
+			break
+		case 'rentrerBateau':
+			const idBateau = data.content.idBateau
+			// Actions
+			bateauxSource.getFeatureById(idBateau).setGeometry(null)
+			retirerTrajets(idBateau)
+			// Toaster
+			toaster(`Le bateau n°${idBateau} et ses trajets ont été retirés de la carte`)
+			break
+		default:
+			console.log("UNHANDLED EVENT")
+			break
 	}
 }
 

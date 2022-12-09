@@ -81,7 +81,7 @@ function buildRoutingQuery(oldXY, newXY) {
 	const nearestNodeFromOldXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${oldXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
 	const nearestNodeFromNewXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${newXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
 	const query = `
-	SELECT ST_Union(wkb_geometry)
+	SELECT ST_ChaikinSmoothing(ST_LineMerge(ST_Union(wkb_geometry)), 5, true)
 	FROM pgr_dijkstra('SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM postgis_01_routes', (${nearestNodeFromOldXY}), (${nearestNodeFromNewXY}), FALSE) AS pgr
 	LEFT JOIN postgis_01_routes AS r ON pgr.edge = r.ogc_fid
 	`

@@ -458,10 +458,9 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  api.delete('/trajets/:identifiant', async (req, res) => {
 	const idBateau = req.params.identifiant
 	const deleted = await deleteTrajets(idBateau)
-	if(deleted > 0){
+	if (deleted > 0) {
 		res.status(200).json("Les " + deleted + " trajets du bateau " + idBateau + " ont bien été supprimés")
-	}else{
-		res.status(404).json("Aucun trajet n'a été supprimé")
+	} else {
+		res.status(200).json("Aucun trajet n'a été supprimé")
 	}
-	sse.send({ type: 'supprimerTrajets', content: { idBateau } })
 })

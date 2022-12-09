@@ -37,13 +37,14 @@
         <div id="buttons">
             <button id="button1">Lister tous les ports</button>
             <button id="button2">Déplacer le bateau vers 2, 48</button>
+            <button id="button3">Rentrer le bateau</button>
         </div>
         <div id="results"></div>
     </div>
     <!-- JAVASCRIPT -->
     <script src="CarthaPirates.js"></script>
     <script>
-        const carthapirates = new CarthaPirates(2) // Indiquez le numéro du bateau
+        const carthapirates = new CarthaPirates(0) // Indiquez le numéro du bateau
         
         document.querySelector('#button1').addEventListener('click', function(){
             const ports = carthapirates.listerTousLesPorts().then(ports => {
@@ -53,8 +54,14 @@
         })
         
         document.querySelector('#button2').addEventListener('click', function(){
-            const ports = carthapirates.deplacerMonBateauVersCoords([2, 48]).then(() => {
+            carthapirates.deplacerMonBateauVersCoords([2, 48]).then(() => {
                 document.querySelector('#results').innerHTML = 'Le bateau a été déplacé'
+            })
+        })
+        
+        document.querySelector('#button3').addEventListener('click', function(){
+            carthapirates.rentrerMonBateau().then(() => {
+                document.querySelector('#results').innerHTML = 'Le bateau a été rentré'
             })
         })
     </script>
