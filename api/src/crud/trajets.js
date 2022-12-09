@@ -21,7 +21,7 @@ const Trajet = sequelize.define('Trajet', {
 
 async function getTrajets () {
 	const sql = `
-	SELECT id, id_bateau, date, ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC) AS ordre
+	SELECT id, id_bateau, date, geom, ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC) AS ordre
 	FROM trajets
 	WHERE geom IS NOT NULL AND deleted = false;
 	`

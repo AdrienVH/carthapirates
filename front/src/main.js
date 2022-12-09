@@ -79,7 +79,7 @@ const bateaux = new ol.layer.Vector({
 function getTrajetsStyle(f){
 	return new ol.style.Style({
 		stroke: new ol.style.Stroke({
-			color: focusBateau && f.get('idBateau') != idBateau ? "rgba(0, 0, 0, 0.1)" : "red",
+			color: focusBateau && f.get('idBateau') != idBateau ? "rgba(0, 0, 0, 0.1)" : "orange",
 			width: focusBateau && f.get('idBateau') != idBateau ? 1 : 2
 		})
 	});
