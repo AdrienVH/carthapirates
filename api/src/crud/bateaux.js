@@ -62,7 +62,7 @@ async function putBateau(idBateau, lon, lat) {
 	if (oldXy) {
 		trajetGeom = `(${buildRoutingQuery(oldXy, [lon, lat])})`
 	}
-	let trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom}) RETURNING id`
+	let trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom}, FALSE) RETURNING id`
 	const returning = await sequelize.query(trajetSql, { type: QueryTypes.INSERT })
 	const idTrajet = returning[0][0].id
 	const trajet = await getTrajet(idTrajet)
