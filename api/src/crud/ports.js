@@ -43,12 +43,12 @@ async function getPortsByLonLat(lon, lat, limit) {
 }
 
 function buildRoutingQuery(lon, lat) {
-	const nearestNodeFromXY = `SELECT id FROM postgis_01_routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), the_geom) ASC LIMIT 1`
+	const nearestNodeFromXY = `SELECT id FROM routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), the_geom) ASC LIMIT 1`
 	const nodesFromPorts = `SELECT array_agg(nearest_node) FROM ports`
 	const query = `
 	SELECT end_vid AS port_node, MAX(agg_cost) AS distance
 	FROM pgr_dijkstra(
-		'SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM postgis_01_routes',
+		'SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM routes',
 		(${nearestNodeFromXY}),
 		(${nodesFromPorts}),
 		FALSE
