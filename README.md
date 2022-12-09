@@ -26,7 +26,7 @@ Puis, démarrer l'application avec la commande `make startDev` ou `make watchDev
 
 Arrêter et nettoyer l'environnement avec la commande `make clean`.
 
-Puis, démarrer l'application avec la commande `make start`.
+Puis, démarrer l'application avec la commande `make start` ou `make watch`.
 
 * [carthapirates.fr](https://carthapirates.fr/)
   * Application web consommant l'API (jQuery, OpenLayers)
@@ -35,9 +35,13 @@ Puis, démarrer l'application avec la commande `make start`.
 
 L'application est hébergée en France ([ScaleWay](https://www.scaleway.com/fr/)).
 
-## Utilisation de l'API
+## Utilisation de l'API (Production)
 
 L'API de l'application Web n'est pas sécurisée. Si l'application est démarrée, l'accès est ouvert à tous.
+
+### Swagger UI
+
+Afin de consommer l'API via Swagger UI, utilisez [cette interface](https://carthapirates.fr/api/documentation/)
 
 ### Python
 
