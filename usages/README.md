@@ -2,9 +2,7 @@
 
 L'API de CarthaPirates n'est pas sécurisée. Si l'application est démarrée, l'accès à son API est ouvert à tous.
 
-Vous pouvez vérifier l'état de l'application via [Better Uptime](https://status.carthapirates.fr).
-
-<iframe src="https://status.carthapirates.fr" width="900" height="620" frameBorder="0" scrolling="no" id="iframe"></iframe>
+Vous pouvez vérifier l'état de l'application via [status.carthapirates.fr](https://status.carthapirates.fr).
 
 ## Via Swagger UI
 
