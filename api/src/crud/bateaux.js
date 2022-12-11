@@ -39,9 +39,9 @@ async function getBateauxByLonLat (lon, lat, limit) {
 
 // COMMANDS
 
-async function createBateau(idBateau, classe, nom) {
-	let sql = "INSERT INTO bateaux VALUES (:idBateau, :nom, :classe, NULL);"
-	const bateau = await sequelize.query(sql, { replacements: { idBateau, classe, nom }, type: QueryTypes.INSERT }).then(() => { return Bateau.findByPk(idBateau) })
+async function createBateau(classe, nom) {
+	let sql = "INSERT INTO bateaux VALUES (DEFAULT, :nom, :classe, NULL) RETURNING id;"
+	const bateau = await sequelize.query(sql, { replacements: { nom, classe }, type: QueryTypes.INSERT }).then((r) => { return Bateau.findByPk(r[0][0].id) })
 	return bateau
 }
 

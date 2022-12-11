@@ -74,25 +74,21 @@ api.get('/bateaux', async (req, res) => {
  *         description: Le bateau a bien été récupéré
  */
 api.get('/bateaux/:identifiant', async (req, res) => {
-	const bateaux = await getBateau(req.params.identifiant)
-	res.status(200).json(bateaux)
+	const idBateau = parseInt(req.params.identifiant)
+	const bateau = await getBateau(idBateau)
+	res.status(200).json(bateau)
 })
 
 /**
  * @swagger
  *
- * /bateaux/{identifiant}:
+ * /bateaux:
  *   post:
  *     description: Crée un bateau
  *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
- *         description: Identifiant du bateau à créer
- *         in: path
- *         required: true
- *         type: integer
  *       - name: classe
  *         description: Nom de la classe du bateau à créer
  *         in: query
@@ -109,12 +105,11 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/bateaux/:identifiant', async (req, res) => {
+api.post('/bateaux/', async (req, res) => {
 	try {
-		const idBateau = parseInt(req.params.identifiant)
 		const classe = req.query.classe
 		const nom = req.query.nom
-		const bateau = await createBateau(idBateau, classe, nom)
+		const bateau = await createBateau(classe, nom)
 		res.status(201).json(bateau)
 	} catch (err) {
 		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
