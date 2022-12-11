@@ -81,7 +81,7 @@ api.get('/bateaux/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /bateaux/{identifiant}/{nom}/{longitude}/{latitude}:
+ * /bateaux/{identifiant}:
  *   post:
  *     description: Crée un bateau
  *     tags: [Bateaux]
@@ -93,33 +93,31 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *         in: path
  *         required: true
  *         type: integer
- *       - name: nom
- *         description: Nom du bateau à créer
- *         in: path
+ *       - name: classe
+ *         description: Nom de la classe du bateau à créer
+ *         in: query
  *         required: true
  *         type: string
- *       - name: longitude
- *         description: Longitude
- *         in: path
+ *       - name: nom
+ *         description: Nom du bateau à créer
+ *         in: query
  *         required: true
- *         type: number
- *       - name: latitude
- *         description: Latitude
- *         in: path
- *         required: true
- *         type: number
+ *         type: string
  *     responses:
  *       201:
  *         description: Le bateau a bien été créé
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/bateaux/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
+api.post('/bateaux/:identifiant', async (req, res) => {
 	try {
-		const bateau = await createBateau(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+		const idBateau = parseInt(req.params.identifiant)
+		const classe = req.query.classe
+		const nom = req.query.nom
+		const bateau = await createBateau(idBateau, classe, nom)
 		res.status(201).json(bateau)
-	} catch (error) {
-		const erreurs = error.errors.map(err => err.message);
+	} catch (err) {
+		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
 		res.status(500).json({ code: 500, erreurs })
 	}
 })
@@ -154,7 +152,10 @@ api.post('/bateaux/:identifiant/:nom/:longitude/:latitude', async (req, res) => 
  *         description: La localisation du bateau a bien été modifiée
  */
 api.put('/bateaux/:identifiant', async (req, res) => {
-	const content = await putBateau(req.params.identifiant, req.query.longitude, req.query.latitude)
+	const idBateau = parseInt(req.params.identifiant)
+	const lon = parseFloat(req.query.longitude)
+	const lat = parseFloat(req.query.latitude)
+	const content = await putBateau(idBateau, lon, lat)
 	res.status(201).json(content.bateau)
 	sse.send({ type: 'deplacerBateau', content })
 })
