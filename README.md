@@ -28,14 +28,13 @@ Image utilisée : `FROM pgrouting/pgrouting`
 
 ### 1.2 Service *back*
 
-L'API REST est une API utilisant **Node.js** et **Express**. Son rôle est de permettre la consommation de la base de données du service *db* (grâce à l'ORM **Sequelize**) par les différents clients, dont le service *front*. Sa documentation est assurée par **Swagger UI**.
+L'API REST est une API utilisant **Node.js** et **Express**. Son rôle est de permettre la consommation de la base de données du service *db* (grâce à l'ORM **Sequelize**) par les différents clients, dont le service *front*. Sa documentation est assurée par **Swagger**.
 
 Image utilisée : `FROM node:12`
 
 ### 1.3 Service *front*
 
-L'application web utilise **Nginx** et consomme le service *api*. Elle est codée avec les langages **HTML5**, **CSS3** et **Javascript**. Elle utilise notamment deux librairies JS : **jQuery 3**, pour la manipulation du DOM et la consommation de l'API REST
- * **OpenLayers 6**, pour le composant cartographique
+L'application web utilise **Nginx** et consomme le service *api*. Elle est codée avec les langages **HTML5**, **CSS3** et **Javascript**. Elle utilise notamment deux librairies JS : **jQuery 3**, pour la manipulation du DOM et la consommation de l'API REST, et **OpenLayers 6**, pour le composant cartographique.
 
 Image utilisée : `FROM nginx:alpine`
 
