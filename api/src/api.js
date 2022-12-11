@@ -1,6 +1,7 @@
 const { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, rentrerBateau, deleteBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const { getTrajets, deleteTrajets } = require('./crud/trajets')
+const { getClasses, getClasse, createClasse } = require('./crud/classes')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -291,8 +292,8 @@ api.get('/ports', async (req, res) => {
  *         description: Le port a bien été récupéré
  */
 api.get('/ports/:identifiant', async (req, res) => {
-	const ports = await getPort(req.params.identifiant)
-	res.status(200).json(ports)
+	const port = await getPort(req.params.identifiant)
+	res.status(200).json(port)
 })
 
 /**
@@ -458,5 +459,93 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
 		res.status(200).json("Les " + deleted + " trajets du bateau " + idBateau + " ont bien été supprimés")
 	} else {
 		res.status(200).json("Aucun trajet n'a été supprimé")
+	}
+})
+
+/**
+ * @swagger
+ *
+ * tags:
+ *  name: Classes
+ */
+
+/**
+ * @swagger
+ *
+ * /classes:
+ *   get:
+ *     description: Récupère la liste des classes
+ *     tags: [Classes]
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: La liste des classes a bien été récupérée
+ */
+ api.get('/classes', async (req, res) => {
+	const classes = await getClasses()
+	res.status(200).json(classes)
+})
+
+/**
+ * @swagger
+ *
+ * /classes/{nom}:
+ *   get:
+ *     description: Récupère une classe
+ *     tags: [Classes]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: nom
+ *         description: Nom de la classe
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: La classe a bien été récupérée
+ *       404:
+ *         description: Aucune classe ne porte ce nom
+ */
+ api.get('/classes/:nom', async (req, res) => {
+	const nom = req.params.nom
+	const classe = await getClasse(nom)
+	if (classe) {
+		res.status(200).json(classe)
+	} else {
+		res.status(404).json({ code: 404, erreurs: ['Aucune classe ne porte ce nom'] })
+	}
+})
+
+/**
+ * @swagger
+ *
+ * /classes:
+ *   post:
+ *     description: Crée une classe
+ *     tags: [Classes]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: nom
+ *         description: Nom de la classe à créer
+ *         in: query
+ *         required: true
+ *         type: string
+ *     responses:
+ *       201:
+ *         description: La classe a bien été créée
+ *       500:
+ *         description: Une erreur est survenue
+ */
+api.post('/classes', async (req, res) => {
+	try {
+		const nom = req.query.nom
+		const classe = await createClasse(nom)
+		res.status(201).json(classe)
+	} catch (error) {
+		const erreurs = error.errors.map(err => err.message);
+		res.status(500).json({ code: 500, erreurs })
 	}
 })
