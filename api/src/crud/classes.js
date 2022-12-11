@@ -34,6 +34,11 @@ async function createClasse(nom) {
 	return classe
 }
 
+async function deleteClasse(nom) {
+	const deleted = await Classe.destroy({ where: { nom } })
+	return deleted
+}
+
 // EXPORTS
 
-module.exports = { getClasses, getClasse, createClasse }
+module.exports = { getClasses, getClasse, createClasse, deleteClasse }

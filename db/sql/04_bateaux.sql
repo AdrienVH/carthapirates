@@ -4,7 +4,7 @@ CREATE TABLE bateaux (
     nom text NOT NULL,
     nom_classe text NOT NULL,
     geom geometry(POINT, 4326),
-    CONSTRAINT fkey_bateaux_classes FOREIGN KEY(nom_classe) REFERENCES classes(nom)
+    CONSTRAINT fkey_bateaux_classes FOREIGN KEY(nom_classe) REFERENCES classes(nom) ON DELETE CASCADE
 );
 
 -- Enseignants

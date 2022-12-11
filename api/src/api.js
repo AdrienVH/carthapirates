@@ -1,7 +1,7 @@
 const { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, rentrerBateau, deleteBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const { getTrajets, deleteTrajets } = require('./crud/trajets')
-const { getClasses, getClasse, createClasse } = require('./crud/classes')
+const { getClasses, getClasse, createClasse, deleteClasse } = require('./crud/classes')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -547,5 +547,35 @@ api.post('/classes', async (req, res) => {
 	} catch (error) {
 		const erreurs = error.errors.map(err => err.message);
 		res.status(500).json({ code: 500, erreurs })
+	}
+})
+
+/**
+ * @swagger
+ *
+ * /classes/{nom}:
+ *   delete:
+ *     description: Supprime une classe
+ *     tags: [Classes]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: nom
+ *         description: Nom de la classe
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: La classe a bien été supprimée
+ *       404:
+ *         description: Aucune classe n'a été supprimée
+ */
+ api.delete('/classes/:nom', async (req, res) => {
+	const deleted = await deleteClasse(req.params.nom)
+	if(deleted == 1){
+		res.status(200).json("La classe a bien été supprimée")
+	}else{
+		res.status(404).json("Aucune classe n'a été supprimée")
 	}
 })
