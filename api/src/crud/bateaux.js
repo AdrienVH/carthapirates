@@ -1,5 +1,5 @@
 const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
-const { getTrajet } = require('./trajets')
+const { getTrajetsBateau } = require('./trajets')
 
 // DATABASE
 
@@ -45,19 +45,19 @@ async function createBateau(classe, nom) {
 	return bateau
 }
 
-async function putBateau(idBateau, lon, lat) {
+async function deplacerBateau(idBateau, lon, lat) {
 	// On récupère le bateau
 	const oldBateau = await Bateau.findByPk(idBateau)
 	const oldXy = oldBateau.toJSON().geom ? oldBateau.toJSON().geom.coordinates : null
 	// On déplace le bateau
 	let sql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon, :lat), 4326) WHERE id = :idBateau"
-	const bateau = await sequelize.query(sql, { replacements: { idBateau, lon, lat }, type: QueryTypes.UPDATE }).then(() => {return Bateau.findByPk(idBateau)})
+	const bateau = await sequelize.query(sql, { replacements: { idBateau, lon, lat }, type: QueryTypes.UPDATE }).then(() => { return Bateau.findByPk(idBateau) })
 	// On trace le trajet
 	const trajetGeom = oldXy ? `(${buildRoutingQuery(oldXy, [lon, lat])})` : 'NULL'
-	const trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom}, FALSE) RETURNING id`
-	const trajet = await sequelize.query(trajetSql, { type: QueryTypes.INSERT }).then((r) => { return getTrajet(r[0][0].id) })
-	// On retourne le bateau et le trajet
-	return { bateau, trajet }
+	const trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom}, FALSE);`
+	const trajets = await sequelize.query(trajetSql, {type: QueryTypes.INSERT }).then(() => { return getTrajetsBateau(idBateau) })
+	// On retourne le bateau et tous ses trajets
+	return { bateau, trajets }
 }
 
 function buildRoutingQuery(oldXY, newXY) {
@@ -85,4 +85,4 @@ async function deleteBateau(id) {
 
 // EXPORTS
 
-module.exports = { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, rentrerBateau, deleteBateau }
+module.exports = { getBateaux, getBateau, createBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, deleteBateau }

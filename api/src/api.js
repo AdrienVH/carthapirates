@@ -1,6 +1,6 @@
-const { getBateaux, getBateau, createBateau, getBateauxByLonLat, putBateau, rentrerBateau, deleteBateau } = require('./crud/bateaux')
+const { getBateaux, getBateau, createBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, deleteBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
-const { getTrajets, deleteTrajets } = require('./crud/trajets')
+const { getTrajets, getTrajetsBateau, deleteTrajets } = require('./crud/trajets')
 const { getClasses, getClasse, createClasse, deleteClasse } = require('./crud/classes')
 const express = require('express')
 const cors = require('cors')
@@ -151,7 +151,7 @@ api.put('/bateaux/:identifiant', async (req, res) => {
 	const idBateau = parseInt(req.params.identifiant)
 	const lon = parseFloat(req.query.longitude)
 	const lat = parseFloat(req.query.latitude)
-	const content = await putBateau(idBateau, lon, lat)
+	const content = await deplacerBateau(idBateau, lon, lat)
 	res.status(201).json(content.bateau)
 	sse.send({ type: 'deplacerBateau', content })
 })
@@ -176,7 +176,7 @@ api.put('/bateaux/:identifiant', async (req, res) => {
  *         description: La localisation du bateau a bien été retirée
  */
  api.put('/bateaux/:identifiant/rentrer', async (req, res) => {
-	const idBateau = req.params.identifiant
+	const idBateau = parseInt(req.params.identifiant)
 	await rentrerBateau(idBateau)
 	await deleteTrajets(idBateau)
 	res.status(201).json('Le bateau a bien été retiré')
@@ -428,6 +428,31 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  */
  api.get('/trajets', async (req, res) => {
 	const trajets = await getTrajets()
+	res.status(200).json(trajets)
+})
+
+/**
+ * @swagger
+ *
+ * /trajets/bateau/{identifiant}:
+ *   get:
+ *     description: Récupère les trajets d'un bateau
+ *     tags: [Trajets]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: identifiant
+ *         description: Identifiant du bateau
+ *         in: path
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: Les trajets du bateau ont bien été récupérés
+ */
+ api.get('/trajets/bateau/:identifiant', async (req, res) => {
+	const idBateau = parseInt(req.params.identifiant)
+	const trajets = await getTrajetsBateau(idBateau)
 	res.status(200).json(trajets)
 })
 

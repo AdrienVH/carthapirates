@@ -20,12 +20,24 @@ const Trajet = sequelize.define('Trajet', {
 // QUERIES
 
 async function getTrajets () {
+	// FIX ME #18 : ROW_NUMBER devrait retourner un integer et non une string
 	const sql = `
 	SELECT id, id_bateau, date, geom, ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC) AS ordre
 	FROM trajets
 	WHERE geom IS NOT NULL AND deleted = false;
 	`
 	const trajets = await sequelize.query(sql, { type: QueryTypes.SELECT })
+	return trajets
+}
+
+async function getTrajetsBateau (idBateau) {
+	// FIX ME #18 : ROW_NUMBER devrait retourner un integer et non une string
+	const sql = `
+	SELECT id, id_bateau, date, geom, ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC) AS ordre
+	FROM trajets
+	WHERE id_bateau = :idBateau AND geom IS NOT NULL AND deleted = false;
+	`
+	const trajets = await sequelize.query(sql, { replacements: { idBateau }, type: QueryTypes.SELECT })
 	return trajets
 }
 
@@ -43,4 +55,4 @@ async function deleteTrajets (idBateau) {
 
 // EXPORTS
 
-module.exports = { getTrajets, getTrajet, deleteTrajets }
+module.exports = { getTrajets, getTrajetsBateau, getTrajet, deleteTrajets }

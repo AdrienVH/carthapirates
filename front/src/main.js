@@ -2,7 +2,7 @@ const isProd = window.location.hostname == 'carthapirates.fr' ? true : false
 
 const API_BASE_URL = isProd ? 'https://carthapirates.fr/api' : 'http://localhost:9001'
 
-if (isProd) $('#ribbon').hide()
+if (isProd) $('#ribbon').remove()
 
 let focusBateau = false
 let idBateau = null
@@ -34,7 +34,7 @@ function getPortsStyle(f){
 		text: new ol.style.Text({
 			offsetY: 1,
 			text: f.getId().toString(),
-			font: 'bold 11px sans-serif',
+			font: 'bold 12px sans-serif',
 			fill: new ol.style.Fill({color: 'white'})
 		})
 	});
@@ -61,8 +61,8 @@ function getBateauxStyle(f){
 			offsetY: 6,
 			text: focusBateau && f.getId() != idBateau ? "" : f.get("nom"),
 			font: "bold 30px 'Ms Madi'",
-			fill: new ol.style.Fill({color: 'dimgrey'}),
-			stroke: new ol.style.Stroke({color: 'white', width: 3}),
+			fill: new ol.style.Fill({ color: 'dimgrey' }),
+			stroke: new ol.style.Stroke({ color: 'white', width: 3 }),
 		})
 	});
 }
@@ -77,10 +77,13 @@ const bateaux = new ol.layer.Vector({
 /***** TRAJETS */
 
 function getTrajetsStyle(f){
+	let opacity = f.get('ordre') / f.get('ordreMax')
+	const orange = `rgba(255, 165, 0, ${opacity})`
+	const gris = '#aaaaaa'
 	return new ol.style.Style({
 		stroke: new ol.style.Stroke({
-			color: focusBateau && f.get('idBateau') != idBateau ? "rgba(0, 0, 0, 0.1)" : "orange",
-			width: focusBateau && f.get('idBateau') != idBateau ? 1 : 2
+			color: focusBateau && f.get('idBateau') != idBateau ? gris : orange,
+			width: focusBateau && f.get('idBateau') != idBateau ? 1 : 3
 		})
 	});
 }
@@ -96,7 +99,7 @@ const trajets = new ol.layer.Vector({
 
 const map = new ol.Map({
 	layers: [mapbox, trajets, ports, bateaux],
-	target: document.getElementById('map'),
+	target: 'map',
 	view: new ol.View({
 		center: ol.proj.transform([6.0, 40.0], 'EPSG:4326', 'EPSG:3857'),
 		minZoom: 6,
@@ -153,10 +156,8 @@ getPorts()
 
 function getBateaux(){
 	const request = $.ajax({ url: API_BASE_URL + "/bateaux",method: "GET" })
-	request.done(function(records) {
-		for(const bateau of records){
-			addBateauToMap(bateau)
-		}
+	request.done(function(bateaux) {
+		bateaux.forEach(bateau => addBateauToMap(bateau))
 	})
 	request.fail(function(jqXHR, textStatus) {
 		console.log("FAIL", jqXHR, textStatus)
@@ -184,34 +185,39 @@ getBateaux()
 
 function getTrajets(){
 	const request = $.ajax({ url: API_BASE_URL + "/trajets", method: "GET" })
-	request.done(function(records) {
-		for (const trajet of records) {
-			addTrajetToMap(trajet);
-		}
+	request.done(function(trajets) {
+		const ordreMax = Math.max.apply(null, trajets.map(t => parseInt(t.ordre))) // FIX ME #18 : se passer du parseInt
+		trajets.forEach(trajet => addTrajetToMap(trajet, ordreMax))
 	})
 	request.fail(function(jqXHR, textStatus) {
 		console.log("FAIL", jqXHR, textStatus);
 	})
 }
 
-function addTrajetToMap(trajet) {
+function addTrajetToMap(trajet, ordreMax) {
 	const feature = new ol.Feature({ });
-	feature.set("idBateau", trajet.idBateau)
-	feature.set("ordre", trajet.ordre)
+	feature.set("idBateau", trajet.id_bateau)
+	feature.set("ordre", parseInt(trajet.ordre)) // FIX ME #18 : se passer du parseInt
+	feature.set("ordreMax", ordreMax)
 	if (trajet.geom) {
-		const geom = new ol.format.GeoJSON().readGeometry(trajet.geom, { featureProjection: "EPSG:3857" })
-		feature.setGeometry(geom)
+		feature.setGeometry(new ol.format.GeoJSON().readGeometry(trajet.geom, { featureProjection: "EPSG:3857" }))
 	}
 	trajetsSource.addFeature(feature)
 }
 
-getTrajets()
-
-function retirerTrajets(idBateau){
-	for (const f of trajetsSource.getFeatures()) {
-		if (f.get('idBateau') == idBateau) trajetsSource.removeFeature(f)
-	}
+function retirerTrajets(idBateau) {
+	trajetsSource.getFeatures().filter(f => f.get('idBateau') == idBateau).forEach(f => trajetsSource.removeFeature(f))
 }
+
+function remplacerTrajets(idBateau, trajets) {
+	// On supprime les anciens trajets
+	retirerTrajets(idBateau)
+	// On ajoute les nouveaux trajets
+	const ordreMax = Math.max.apply(null, trajets.map(t => parseInt(t.ordre))) // FIX ME #18 : se passer du parseInt
+	trajets.forEach(trajet => addTrajetToMap(trajet, ordreMax))
+}
+
+getTrajets()
 
 /************ SSE */
 
@@ -245,10 +251,10 @@ eventSource.onmessage = event => {
 	switch (data.type) {
 		case 'deplacerBateau':
 			const bateau = data.content.bateau
-			const trajet = data.content.trajet
+			const trajets = data.content.trajets
 			// Actions
 			moveBateau(bateau)
-			addTrajetToMap(trajet)
+			remplacerTrajets(bateau.id, trajets)
 			// Toaster
 			toaster(`Le bateau n°${bateau.id} s'est déplacé vers ${bateau.geom.coordinates.join(', ')}`)
 			break
