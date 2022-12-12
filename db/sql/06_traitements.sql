@@ -18,3 +18,9 @@ WITH nodes AS (
     CROSS JOIN LATERAL (SELECT v.id, v.the_geom <-> p.geom AS dist FROM routes_vertices_pgr AS v ORDER BY dist LIMIT 1) v
 )
 UPDATE ports SET nearest_node = nodes.node_id FROM nodes WHERE nodes.port_id = ports.id;
+
+-- Versions utilisées
+
+SELECT 'postgis' AS extension, postgis_version() AS version
+UNION
+SELECT 'pgrouting' AS extension, pgr_version() AS version;
