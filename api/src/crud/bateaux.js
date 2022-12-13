@@ -1,20 +1,21 @@
-const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
-const { getTrajetsBateau } = require('./trajets')
+import { Sequelize, DataTypes, QueryTypes } from 'sequelize'
+import { getTrajetsBateau } from './trajets'
 
 // DATABASE
 
-const sequelize = new Sequelize('carthapirates', 'carthapirates', 'carthapirates', { host: 'db', port: 5432, dialect: 'postgres' });
+const sequelize = new Sequelize('carthapirates', 'carthapirates', 'carthapirates', { host: 'db', port: 5432, dialect: 'postgres' })
 
 // MODEL
 
 const Bateau = sequelize.define('Bateau', {
 	id: { type: DataTypes.INTEGER, allowNull:false, primaryKey: true },
 	nom: { type: DataTypes.STRING, allowNull: false },
+	nearestNode: { type: DataTypes.INTEGER, allowNull: true, field: 'nearest_node' },
 	geom: { type: DataTypes.GEOMETRY }
 }, {
 	timestamps: false,
 	tableName: 'bateaux'
-});
+})
 
 // QUERIES
 
@@ -28,53 +29,75 @@ async function getBateau (id) {
 	return bateau.toJSON()
 }
 
-async function getBateauxByLonLat (lon, lat, limit) {
-	let sql = "SELECT *, ST_Distance(St_Transform(ST_SetSRID(ST_Point(:lon, :lat), 4326), 3857), ST_Transform(geom, 3857)) AS distance FROM bateaux WHERE geom IS NOT NULL ORDER BY distance ASC LIMIT :limit"
-	const bateaux = await sequelize.query(sql, {
-		replacements: { lon, lat, limit },
-		type: QueryTypes.SELECT
-	})
+async function getBateauxByLonLat(lon, lat, limit) {
+	let routingQuery = buildRoutingQuery(lon, lat)
+	let sql = `
+	WITH routes AS (${routingQuery})
+	SELECT bateaux.id, bateaux.nom, bateaux.geom, ROUND(routes.distance::numeric, 2) AS distance
+	FROM routes
+	LEFT JOIN bateaux ON routes.bateau_node = bateaux.nearest_node
+	WHERE bateaux.geom IS NOT NULL AND bateaux.nearest_node IS NOT NULL
+	ORDER BY routes.distance ASC
+	LIMIT :limit;
+	`
+	const bateaux = await sequelize.query(sql, { replacements: { limit }, type: QueryTypes.SELECT })
 	return bateaux
+}
+
+function buildRoutingQuery(lon, lat) {
+	const nearestNodeFromXY = `SELECT id FROM routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), the_geom) ASC LIMIT 1`
+	const nodesFromBateaux = `SELECT array_agg(nearest_node) FROM bateaux WHERE nearest_node IS NOT NULL`
+	const query = `
+	SELECT end_vid AS bateau_node, MAX(agg_cost) AS distance
+	FROM pgr_dijkstra(
+		'SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM routes',
+		(${nearestNodeFromXY}),
+		(${nodesFromBateaux}),
+		FALSE
+	)
+	GROUP BY end_vid
+	`
+	return query
 }
 
 // COMMANDS
 
-async function createBateau(classe, nom) {
+async function createBateau (classe, nom) {
 	let sql = "INSERT INTO bateaux VALUES (DEFAULT, :nom, :classe, NULL) RETURNING id;"
 	const bateau = await sequelize.query(sql, { replacements: { nom, classe }, type: QueryTypes.INSERT }).then((r) => { return Bateau.findByPk(r[0][0].id) })
 	return bateau
 }
 
-async function deplacerBateau(idBateau, lon, lat) {
-	// On récupère le bateau
+async function deplacerBateau (idBateau, lon, lat) {
+	// On récupère l'ancienne position du bateau
 	const oldBateau = await Bateau.findByPk(idBateau)
-	const oldXy = oldBateau.toJSON().geom ? oldBateau.toJSON().geom.coordinates : null
-	// On déplace le bateau
-	let sql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon, :lat), 4326) WHERE id = :idBateau"
-	const bateau = await sequelize.query(sql, { replacements: { idBateau, lon, lat }, type: QueryTypes.UPDATE }).then(() => { return Bateau.findByPk(idBateau) })
-	// On trace le trajet
-	const trajetGeom = oldXy ? `(${buildRoutingQuery(oldXy, [lon, lat])})` : 'NULL'
+	const oldNearestNode = oldBateau.nearestNode
+	// On recherche le node le plus proche de la nouvelle position du bateau
+	const nearestNodeSql = `SELECT v.id FROM routes_vertices_pgr AS v ORDER BY v.the_geom <-> ST_SetSRID(ST_MakePoint(:lon, :lat), 4326) ASC LIMIT 1`
+	const nearestNode = await sequelize.query(nearestNodeSql, { replacements: { idBateau, lon, lat }, type: QueryTypes.SELECT }).then((nodes) => { return nodes[0].id })
+	// On met à jour la position et le nearest_node du bateau
+	const bateauSql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), nearest_node = :nearestNode WHERE id = :idBateau"
+	const bateau = await sequelize.query(bateauSql, { replacements: { idBateau, lon, lat, nearestNode }, type: QueryTypes.UPDATE }).then(() => { return Bateau.findByPk(idBateau) })
+	// On crée le trajet qui relie l'ancienne position et le bateau
+	let trajetGeom = 'NULL'
+	if (oldNearestNode) {
+		trajetGeom = `
+		(
+		SELECT ST_ChaikinSmoothing(ST_LineMerge(ST_Union(wkb_geometry)), 5, true)
+		FROM pgr_dijkstra('SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM routes', ${oldNearestNode}, ${nearestNode}, FALSE) AS pgr
+		LEFT JOIN routes AS r ON pgr.edge = r.ogc_fid
+		)
+		`
+	}
 	const trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom}, FALSE);`
-	const trajets = await sequelize.query(trajetSql, {type: QueryTypes.INSERT }).then(() => { return getTrajetsBateau(idBateau) })
+	const trajets = await sequelize.query(trajetSql, { type: QueryTypes.INSERT }).then(() => { return getTrajetsBateau(idBateau) })
 	// On retourne le bateau et tous ses trajets
 	return { bateau, trajets }
 }
 
-function buildRoutingQuery(oldXY, newXY) {
-	const nearestNodeFromOldXY = `SELECT id FROM routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${oldXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
-	const nearestNodeFromNewXY = `SELECT id FROM routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${newXY.join(', ')}), 4326), the_geom) ASC LIMIT 1`
-	const query = `
-	SELECT ST_ChaikinSmoothing(ST_LineMerge(ST_Union(wkb_geometry)), 5, true)
-	FROM pgr_dijkstra('SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM routes', (${nearestNodeFromOldXY}), (${nearestNodeFromNewXY}), FALSE) AS pgr
-	LEFT JOIN routes AS r ON pgr.edge = r.ogc_fid
-	`
-	return query
-}
-
-async function rentrerBateau(idBateau) {
-	let sql = "UPDATE bateaux SET geom = NULL WHERE id = :idBateau"
-	const bateau = await sequelize.query(sql, { replacements: { idBateau }, type: QueryTypes.UPDATE })
-	.then(() => {return Bateau.findByPk(idBateau)})
+async function rentrerBateau (idBateau) {
+	let updateSql = "UPDATE bateaux SET geom = NULL, nearest_node = NULL WHERE id = :idBateau"
+	const bateau = await sequelize.query(updateSql, { replacements: { idBateau }, type: QueryTypes.UPDATE }).then(() => {return Bateau.findByPk(idBateau)})
 	return bateau
 }
 
@@ -85,4 +108,4 @@ async function deleteBateau(id) {
 
 // EXPORTS
 
-module.exports = { getBateaux, getBateau, createBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, deleteBateau }
+export default { getBateaux, getBateau, createBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, deleteBateau }

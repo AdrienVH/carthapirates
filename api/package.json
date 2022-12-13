@@ -1,12 +1,12 @@
 {
-  "name": "myfirstapi",
+  "name": "carthapirates",
   "version": "1.0.0",
-  "description": "My 1st API",
+  "description": "CarthaPirates",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "AdrienVH",
+  "author": "Adrien VAN HAMME (AdrienVH)",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",

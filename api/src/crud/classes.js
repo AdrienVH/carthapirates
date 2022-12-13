@@ -1,8 +1,8 @@
-const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
+import { Sequelize, DataTypes, QueryTypes } from 'sequelize'
 
 // DATABASE
 
-const sequelize = new Sequelize('carthapirates', 'carthapirates', 'carthapirates', { host: 'db', port: 5432, dialect: 'postgres' });
+const sequelize = new Sequelize('carthapirates', 'carthapirates', 'carthapirates', { host: 'db', port: 5432, dialect: 'postgres' })
 
 // MODEL
 
@@ -12,7 +12,7 @@ const Classe = sequelize.define('Classe', {
 }, {
 	timestamps: false,
 	tableName: 'classes'
-});
+})
 
 // QUERIES
 
@@ -41,4 +41,4 @@ async function deleteClasse(nom) {
 
 // EXPORTS
 
-module.exports = { getClasses, getClasse, createClasse, deleteClasse }
+export default { getClasses, getClasse, createClasse, deleteClasse }

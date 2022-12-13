@@ -2,7 +2,8 @@ DROP TABLE IF EXISTS ports;
 CREATE TABLE ports (
     id integer CONSTRAINT pkey_ports_id PRIMARY KEY,
     nom text,
-    geom geometry(POINT, 4326)
+    geom geometry(POINT, 4326),
+    nearest_node integer
 );
 
 INSERT INTO ports VALUES (1, 'Marseille',           ST_SetSRID(ST_MakePoint(05.35668, 43.29763), 4326));

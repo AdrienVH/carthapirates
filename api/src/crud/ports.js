@@ -1,8 +1,8 @@
-const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
+import { Sequelize, DataTypes, QueryTypes } from 'sequelize'
 
 // DATABASE
 
-const sequelize = new Sequelize('carthapirates', 'carthapirates', 'carthapirates', { host: 'db', port: 5432, dialect: 'postgres' });
+const sequelize = new Sequelize('carthapirates', 'carthapirates', 'carthapirates', { host: 'db', port: 5432, dialect: 'postgres' })
 
 // MODEL
 
@@ -14,7 +14,7 @@ const Port = sequelize.define('Port', {
 }, {
 	timestamps: false,
 	tableName: 'ports'
-});
+})
 
 // QUERIES
 
@@ -77,4 +77,4 @@ async function deletePort(id) {
 
 // EXPORTS
 
-module.exports = { getPorts, getPort, createPort, getPortsByLonLat, deletePort }
+export default { getPorts, getPort, createPort, getPortsByLonLat, deletePort }

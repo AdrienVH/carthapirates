@@ -10,8 +10,6 @@ SELECT pgr_createTopology('routes', 0.0001, 'wkb_geometry', 'ogc_fid');
 
 -- Calculer le node le plus proche de chaque port
 
-ALTER TABLE "ports" ADD COLUMN "nearest_node" integer;
-
 WITH nodes AS (
     SELECT p.id AS port_id, v.id AS node_id
     FROM ports AS p
