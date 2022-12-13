@@ -277,9 +277,12 @@ eventSource.onmessage = event => {
 	}
 }
 
-function toaster(message) {
-	const p = $(`<p>${message}</p>`).appendTo('#stream')
-	window.setTimeout(() => p.fadeOut(), 3000);
+function toaster (texte) {
+	const message = $(`<div class="message"><p>${texte}</p></div>`).appendTo('#stream')
+	const div = $(`<div class="bar"></div>`).appendTo(message)
+	message.fadeIn(function() {
+		div.animate({ width: '100%' }, 5000, 'linear', function() { message.fadeOut() })
+	})
 }
 
 //eventSource.close();
