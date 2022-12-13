@@ -334,6 +334,7 @@ api.post('/ports', async (req, res) => {
 		const longitude = req.query.longitude
 		const port = await createPort(nom, longitude, latitude)
 		res.status(201).json(port)
+		sse.send({ type: 'nouveauPort', content: { port } })
 	} catch (error) {
 		const erreurs = error.errors.map(err => err.message);
 		res.status(500).json({ code: 500, erreurs })

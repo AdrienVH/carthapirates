@@ -102,8 +102,7 @@ const map = new ol.Map({
 	target: 'map',
 	view: new ol.View({
 		center: ol.proj.transform([6.0, 40.0], 'EPSG:4326', 'EPSG:3857'),
-		minZoom: 6,
-		zoom: 6,
+		minZoom: 5,
 		maxZoom: 9
 	}),
 	controls : ol.control.defaults({
@@ -265,6 +264,12 @@ eventSource.onmessage = event => {
 			retirerTrajets(idBateau)
 			// Toaster
 			toaster(`Le bateau n°${idBateau} et ses trajets ont été retirés de la carte`)
+			break
+		case 'nouveauPort':
+			const port = data.content.port
+			addPortToMap(port)
+			// Toaster
+			toaster(`Le port n°${port.id} a bien été ajouté à la carte`)
 			break
 		default:
 			console.log("UNHANDLED EVENT")
