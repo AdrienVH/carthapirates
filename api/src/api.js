@@ -299,31 +299,26 @@ api.get('/ports/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /ports/{identifiant}/{nom}/{longitude}/{latitude}:
+ * /ports:
  *   post:
  *     description: Crée un port
  *     tags: [Ports]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
- *         description: Identifiant du port à créer
- *         in: path
- *         required: true
- *         type: integer
  *       - name: nom
  *         description: Nom du port à créer
- *         in: path
+ *         in: query
  *         required: true
  *         type: string
  *       - name: longitude
  *         description: Longitude
- *         in: path
+ *         in: query
  *         required: true
  *         type: number
  *       - name: latitude
  *         description: Latitude
- *         in: path
+ *         in: query
  *         required: true
  *         type: number
  *     responses:
@@ -332,9 +327,12 @@ api.get('/ports/:identifiant', async (req, res) => {
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/ports/:identifiant/:nom/:longitude/:latitude', async (req, res) => {
+api.post('/ports', async (req, res) => {
 	try {
-		const port = await createPort(req.params.identifiant, req.params.nom, req.params.longitude, req.params.latitude)
+		const nom = req.query.nom
+		const latitude = req.query.latitude
+		const longitude = req.query.longitude
+		const port = await createPort(nom, longitude, latitude)
 		res.status(201).json(port)
 	} catch (error) {
 		const erreurs = error.errors.map(err => err.message);

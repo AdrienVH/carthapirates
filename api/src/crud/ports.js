@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, QueryTypes } from 'sequelize'
+const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
 
 // DATABASE
 
@@ -60,13 +60,9 @@ function buildRoutingQuery(lon, lat) {
 
 // COMMANDS
 
-async function createPort(id, nom, lon, lat) {
-	let sql = "INSERT INTO ports VALUES (:id, :nom, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326));"
-	const port = await sequelize.query(sql, {
-		replacements: { id, nom, lon, lat },
-		type: QueryTypes.INSERT
-	})
-	.then(() => {return Port.findByPk(id)})
+async function createPort(nom, lon, lat) {
+	let sql = "INSERT INTO ports VALUES (DEFAULT, :nom, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)) RETURNING id;"
+	const port = await sequelize.query(sql, { replacements: { nom, lon, lat }, type: QueryTypes.INSERT }).then((r) => {return Port.findByPk(r[0][0].id)})
 	return port
 }
 
@@ -77,4 +73,4 @@ async function deletePort(id) {
 
 // EXPORTS
 
-export default { getPorts, getPort, createPort, getPortsByLonLat, deletePort }
+module.exports = { getPorts, getPort, createPort, getPortsByLonLat, deletePort }

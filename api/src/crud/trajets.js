@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, QueryTypes, Op } from 'sequelize'
+const { Sequelize, DataTypes, QueryTypes, Op } = require('sequelize')
 
 // DATABASE
 
@@ -55,4 +55,4 @@ async function deleteTrajets (idBateau) {
 
 // EXPORTS
 
-export default { getTrajets, getTrajetsBateau, getTrajet, deleteTrajets }
+module.exports = { getTrajets, getTrajetsBateau, getTrajet, deleteTrajets }

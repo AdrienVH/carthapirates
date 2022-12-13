@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, QueryTypes } from 'sequelize'
+const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
 
 // DATABASE
 
@@ -41,4 +41,4 @@ async function deleteClasse(nom) {
 
 // EXPORTS
 
-export default { getClasses, getClasse, createClasse, deleteClasse }
+module.exports = { getClasses, getClasse, createClasse, deleteClasse }
