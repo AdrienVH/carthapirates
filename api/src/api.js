@@ -9,10 +9,10 @@ const swaggerUi = require('swagger-ui-express')
 const swaggerJSDoc = require('swagger-jsdoc')
 
 const api = express()
-const port = 8080
+
 const swaggerJSDocOptions = {
 	definition: {
-		info: { title: 'Documentation de l\'API', version: '1.0.0' },
+		info: { title: 'Documentation de l\'API de CarthaPirates', version: '1.0.0' },
 		servers: [{ url: "http://localhost:9001" }]
 	},
 	apis: ['./src/api.js'],
@@ -23,7 +23,7 @@ const SwaggerOptions = { customCss: '.curl-command { display: none }' }
 api.use(express.json())
 api.use(cors())
 api.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions))
-api.listen(port, () => { console.log('REST API is up') })
+api.listen(8080, () => { console.log(`L'API REST est démarréeREST API is up`) })
 
 // SSE
 

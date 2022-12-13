@@ -74,7 +74,7 @@ async function deplacerBateau (idBateau, lon, lat) {
 	const oldNearestNode = oldBateau.nearestNode
 	// On recherche le node le plus proche de la nouvelle position du bateau
 	const nearestNodeSql = `SELECT v.id FROM routes_vertices_pgr AS v ORDER BY v.the_geom <-> ST_SetSRID(ST_MakePoint(:lon, :lat), 4326) ASC LIMIT 1`
-	const nearestNode = await sequelize.query(nearestNodeSql, { replacements: { idBateau, lon, lat }, type: QueryTypes.SELECT }).then((nodes) => { return nodes[0].id })
+	const nearestNode = await sequelize.query(nearestNodeSql, { replacements: { lon, lat }, type: QueryTypes.SELECT }).then((nodes) => { return nodes[0].id })
 	// On met à jour la position et le nearest_node du bateau
 	const bateauSql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), nearest_node = :nearestNode WHERE id = :idBateau"
 	const bateau = await sequelize.query(bateauSql, { replacements: { idBateau, lon, lat, nearestNode }, type: QueryTypes.UPDATE }).then(() => { return Bateau.findByPk(idBateau) })

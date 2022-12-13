@@ -61,8 +61,12 @@ function buildRoutingQuery(lon, lat) {
 // COMMANDS
 
 async function createPort(nom, lon, lat) {
-	let sql = "INSERT INTO ports VALUES (DEFAULT, :nom, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)) RETURNING id;"
-	const port = await sequelize.query(sql, { replacements: { nom, lon, lat }, type: QueryTypes.INSERT }).then((r) => {return Port.findByPk(r[0][0].id)})
+	// On recherche le node le plus proche de la position du port
+	const nearestNodeSql = `SELECT v.id FROM routes_vertices_pgr AS v ORDER BY v.the_geom <-> ST_SetSRID(ST_MakePoint(:lon, :lat), 4326) ASC LIMIT 1`
+	const nearestNode = await sequelize.query(nearestNodeSql, { replacements: { lon, lat }, type: QueryTypes.SELECT }).then((nodes) => { return nodes[0].id })
+	// On crée le port
+	let sql = `INSERT INTO ports VALUES (DEFAULT, :nom, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), ${nearestNode}) RETURNING id;`
+	const port = await sequelize.query(sql, { replacements: { nom, lon, lat, nearestNode }, type: QueryTypes.INSERT }).then((r) => {return Port.findByPk(r[0][0].id)})
 	return port
 }
 
