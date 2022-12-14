@@ -97,7 +97,7 @@ async function deplacerBateau (idBateau, lon, lat) {
 		)
 		`
 	}
-	const trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom}, FALSE);`
+	const trajetSql = `INSERT INTO trajets VALUES (DEFAULT, ${idBateau}, CURRENT_TIMESTAMP, ${trajetGeom});`
 	const trajets = await sequelize.query(trajetSql, { type: QueryTypes.INSERT }).then(() => { return getTrajetsBateau(idBateau) })
 	// On retourne le bateau et tous ses trajets
 	return { bateau, trajets }
