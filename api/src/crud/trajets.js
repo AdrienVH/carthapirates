@@ -20,39 +20,34 @@ const Trajet = sequelize.define('Trajet', {
 // QUERIES
 
 async function getTrajets () {
-	// FIX ME #18 : ROW_NUMBER devrait retourner un integer et non une string
+	// FIX ME #18 : Se passer du cast en integer car ROW_NUMBER devrait retourner un integer
 	const sql = `
-	SELECT id, id_bateau, date, geom, ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC) AS ordre
+	SELECT id, id_bateau, date, geom, (ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC))::integer AS ordre
 	FROM trajets
-	WHERE geom IS NOT NULL AND deleted = false;
+	WHERE geom IS NOT NULL;
 	`
 	const trajets = await sequelize.query(sql, { type: QueryTypes.SELECT })
 	return trajets
 }
 
 async function getTrajetsBateau (idBateau) {
-	// FIX ME #18 : ROW_NUMBER devrait retourner un integer et non une string
+	// FIX ME #18 : Se passer du cast en integer car ROW_NUMBER devrait retourner un integer
 	const sql = `
-	SELECT id, id_bateau, date, geom, ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC) AS ordre
+	SELECT id, id_bateau, date, geom, (ROW_NUMBER () OVER (PARTITION BY id_bateau ORDER BY id ASC))::integer AS ordre
 	FROM trajets
-	WHERE id_bateau = :idBateau AND geom IS NOT NULL AND deleted = false;
+	WHERE id_bateau = :idBateau AND geom IS NOT NULL;
 	`
 	const trajets = await sequelize.query(sql, { replacements: { idBateau }, type: QueryTypes.SELECT })
 	return trajets
 }
 
-async function getTrajet (id) {
-	const trajet = await Trajet.findByPk(id)
-	return trajet
-}
-
 // COMMANDS
 
-async function deleteTrajets (idBateau) {
-	const deleted = await Trajet.update({ deleted: true }, { where: { idBateau } })
+async function supprimerTrajets (idBateau) {
+	const deleted = await Trajet.destroy({ where: { idBateau } })
 	return deleted
 }
 
 // EXPORTS
 
-module.exports = { getTrajets, getTrajetsBateau, getTrajet, deleteTrajets }
+module.exports = { getTrajets, getTrajetsBateau, supprimerTrajets }

@@ -20,7 +20,7 @@ const mapbox = new ol.layer.Tile({
 		url: 'https://api.mapbox.com/styles/v1/adrienvh/cki3g3bme2w2w19qyrxm4wry5/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWRyaWVudmgiLCJhIjoiU2lDV0N5cyJ9.2pFJAwvwZ9eBKKPiOrNWEw'
 	}),
 	name: "mapbox"
-});
+})
 
 /***** PORTS */
 
@@ -37,15 +37,15 @@ function getPortsStyle(f){
 			font: 'bold 12px sans-serif',
 			fill: new ol.style.Fill({color: 'white'})
 		})
-	});
+	})
 }
 
-const portsSource = new ol.source.Vector({projection : 'EPSG:3857'});
+const portsSource = new ol.source.Vector({projection : 'EPSG:3857'})
 const ports = new ol.layer.Vector({
 	source: portsSource,
 	style: getPortsStyle,
 	name: "ports"
-});
+})
 
 /***** BATEAUX */
 
@@ -64,15 +64,15 @@ function getBateauxStyle(f){
 			fill: new ol.style.Fill({ color: 'dimgrey' }),
 			stroke: new ol.style.Stroke({ color: 'white', width: 3 }),
 		})
-	});
+	})
 }
 
-const bateauxSource = new ol.source.Vector({projection : 'EPSG:3857'});
+const bateauxSource = new ol.source.Vector({projection : 'EPSG:3857'})
 const bateaux = new ol.layer.Vector({
 	source: bateauxSource,
 	style: getBateauxStyle,
 	name: "bateaux"
-});
+})
 
 /***** TRAJETS */
 
@@ -85,15 +85,15 @@ function getTrajetsStyle(f){
 			color: focusBateau && f.get('idBateau') != idBateau ? gris : orange,
 			width: focusBateau && f.get('idBateau') != idBateau ? 1 : 3
 		})
-	});
+	})
 }
 
-const trajetsSource = new ol.source.Vector({projection : 'EPSG:3857'});
+const trajetsSource = new ol.source.Vector({projection : 'EPSG:3857'})
 const trajets = new ol.layer.Vector({
 	source: trajetsSource,
 	style: getTrajetsStyle,
 	name: "trajets"
-});
+})
 
 /***** MAP */
 
@@ -112,19 +112,19 @@ const map = new ol.Map({
 })
 
 map.on('singleclick', function (evt) {
-	const xy = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326').map(c => c.toFixed(6)).join(",");
-	$('#xy').html(xy);
-	$('#xy').show();
-	const elm = document.getElementById("xy");
-	const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(elm);
-    selection.removeAllRanges();
-    selection.addRange(range);
-	document.execCommand("Copy");
-	selection.removeAllRanges();
-	$('#xy').hide();
-});
+	const xy = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326').map(c => c.toFixed(6)).join(",")
+	$('#xy').html(xy)
+	$('#xy').show()
+	const elm = document.getElementById("xy")
+	const selection = window.getSelection()
+    const range = document.createRange()
+    range.selectNodeContents(elm)
+    selection.removeAllRanges()
+    selection.addRange(range)
+	document.execCommand("Copy")
+	selection.removeAllRanges()
+	$('#xy').hide()
+})
 
 /************ GET PORTS */
 
@@ -137,12 +137,12 @@ function getPorts(){
 		map.getView().fit(portsSource.getExtent(), { padding: [100, 100, 100, 100] })
 	})
 	request.fail(function(jqXHR, textStatus) {
-		console.log("FAIL", jqXHR, textStatus);
+		console.log("FAIL", jqXHR, textStatus)
 	})
 }
 
 function addPortToMap(record) {
-	const feature = new ol.Feature({ });
+	const feature = new ol.Feature({ })
 	feature.setId(record.id)
 	feature.set("nom", record.nom)
 	feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
@@ -164,7 +164,7 @@ function getBateaux(){
 }
 
 function addBateauToMap(record) {
-	const feature = new ol.Feature({ });
+	const feature = new ol.Feature({ })
 	feature.setId(record.id)
 	feature.set("nom", record.nom)
 	if (record.geom) {
@@ -185,18 +185,18 @@ getBateaux()
 function getTrajets(){
 	const request = $.ajax({ url: API_BASE_URL + "/trajets", method: "GET" })
 	request.done(function(trajets) {
-		const ordreMax = Math.max.apply(null, trajets.map(t => parseInt(t.ordre))) // FIX ME #18 : se passer du parseInt
+		const ordreMax = Math.max.apply(null, trajets.map(t => t.ordre))
 		trajets.forEach(trajet => addTrajetToMap(trajet, ordreMax))
 	})
 	request.fail(function(jqXHR, textStatus) {
-		console.log("FAIL", jqXHR, textStatus);
+		console.log("FAIL", jqXHR, textStatus)
 	})
 }
 
 function addTrajetToMap(trajet, ordreMax) {
-	const feature = new ol.Feature({ });
+	const feature = new ol.Feature({ })
 	feature.set("idBateau", trajet.id_bateau)
-	feature.set("ordre", parseInt(trajet.ordre)) // FIX ME #18 : se passer du parseInt
+	feature.set("ordre", trajet.ordre)
 	feature.set("ordreMax", ordreMax)
 	if (trajet.geom) {
 		feature.setGeometry(new ol.format.GeoJSON().readGeometry(trajet.geom, { featureProjection: "EPSG:3857" }))
@@ -212,7 +212,7 @@ function remplacerTrajets(idBateau, trajets) {
 	// On supprime les anciens trajets
 	retirerTrajets(idBateau)
 	// On ajoute les nouveaux trajets
-	const ordreMax = Math.max.apply(null, trajets.map(t => parseInt(t.ordre))) // FIX ME #18 : se passer du parseInt
+	const ordreMax = Math.max.apply(null, trajets.map(t => t.ordre))
 	trajets.forEach(trajet => addTrajetToMap(trajet, ordreMax))
 }
 
@@ -291,4 +291,4 @@ function toaster (texte) {
 	})
 }
 
-//eventSource.close();
+//eventSource.close()

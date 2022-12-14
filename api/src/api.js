@@ -1,6 +1,6 @@
 const { getBateaux, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
-const { getTrajets, getTrajetsBateau, deleteTrajets } = require('./crud/trajets')
+const { getTrajets, getTrajetsBateau, supprimerTrajets } = require('./crud/trajets')
 const { getClasse, creerClasse, deleteClasse } = require('./crud/classes')
 const express = require('express')
 const cors = require('cors')
@@ -191,7 +191,7 @@ api.put('/bateaux/:identifiant', async (req, res) => {
  api.put('/bateaux/:identifiant/rentrer', async (req, res) => {
 	const idBateau = parseInt(req.params.identifiant)
 	await rentrerBateau(idBateau)
-	await deleteTrajets(idBateau)
+	await supprimerTrajets(idBateau)
 	res.status(201).json('Le bateau a bien été retiré')
 	sse.send({ type: 'rentrerBateau', content: { idBateau } })
 })
@@ -220,9 +220,9 @@ api.put('/bateaux/:identifiant', async (req, res) => {
 api.delete('/bateaux/:identifiant', async (req, res) => {
 	const identifiant = parseInt(req.params.identifiant)
 	const deleted = await supprimerBateau(identifiant)
-	if(deleted == 1){
+	if (deleted == 1) {
 		res.status(200).json(`Le bateau ${identifiant} a bien été supprimé`)
-	}else{
+	} else {
 		res.status(404).json(`Aucun bateau n'a été supprimé`)
 	}
 })
@@ -384,11 +384,12 @@ api.post('/ports', async (req, res) => {
  *         description: Aucun port n'a été supprimé
  */
 api.delete('/ports/:identifiant', async (req, res) => {
-	const deleted = await deletePort(req.params.identifiant)
-	if(deleted == 1){
-		res.status(200).json("Le port a bien été supprimé")
-	}else{
-		res.status(404).json("Aucun port n'a été supprimé")
+	const idPort = parseInt(req.params.identifiant)
+	const deleted = await deletePort(idPort)
+	if (deleted == 1) {
+		res.status(200).json(`Le port ${idPort} a bien été supprimé`)
+	} else {
+		res.status(404).json(`Aucun port n'a été supprimé`)
 	}
 })
 
@@ -485,7 +486,7 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  *
  * /trajets/bateau/{identifiant}:
  *   delete:
- *     description: Supprime les trajets d'un bateau (suppression logique)
+ *     description: Supprime les trajets d'un bateau
  *     tags: [Trajets]
  *     produces:
  *       - application/json
@@ -497,17 +498,21 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  *         type: integer
  *     responses:
  *       200:
- *         description: Les trajets du bateau ont bien été supprimés
+ *         description: Le ou les trajets du bateau ont bien été supprimés
  *       404:
  *         description: Aucun trajet n'a été supprimé
+ *       500:
+ *         description: Une erreur est survenue
  */
  api.delete('/trajets/bateau/:identifiant', async (req, res) => {
-	const idBateau = req.params.identifiant
-	const deleted = await deleteTrajets(idBateau)
-	if (deleted > 0) {
-		res.status(200).json("Les " + deleted + " trajets du bateau " + idBateau + " ont bien été supprimés")
-	} else {
+	const idBateau = parseInt(req.params.identifiant)
+	const deleted = await supprimerTrajets(idBateau)
+	if (deleted == 0) {
 		res.status(404).json({ code: 404, erreurs: [`Aucun trajet n'a été supprimé`] })
+	} else if (deleted >= 1) {
+		res.status(200).json(`Les trajets (${deleted}) du bateau ${idBateau} ont bien été supprimés`)
+	} else {
+		res.status(500).json({ code: 404, erreurs: [`Une erreur est survenue`] })
 	}
 })
 
