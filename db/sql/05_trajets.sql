@@ -5,5 +5,5 @@ CREATE TABLE trajets (
     date date,
     geom geometry(LINESTRING, 4326),
     deleted boolean,
-    CONSTRAINT fkey_trajets_bateaux FOREIGN KEY(id_bateau) REFERENCES bateaux(id)
+    CONSTRAINT fkey_trajets_bateaux FOREIGN KEY(id_bateau) REFERENCES bateaux(id)  ON DELETE CASCADE
 );

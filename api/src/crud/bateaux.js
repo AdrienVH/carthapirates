@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
 const { getTrajetsBateau } = require('./trajets')
+const { getClasse } = require('./classes')
 
 // DATABASE
 
@@ -26,10 +27,10 @@ async function getBateaux () {
 
 async function getBateau (id) {
 	const bateau = await Bateau.findByPk(id)
-	return bateau.toJSON()
+	return bateau
 }
 
-async function getBateauxByLonLat(lon, lat, limit) {
+async function getBateauxByLonLat (lon, lat, limit) {
 	let routingQuery = buildRoutingQuery(lon, lat)
 	let sql = `
 	WITH routes AS (${routingQuery})
@@ -44,7 +45,7 @@ async function getBateauxByLonLat(lon, lat, limit) {
 	return bateaux
 }
 
-function buildRoutingQuery(lon, lat) {
+function buildRoutingQuery (lon, lat) {
 	const nearestNodeFromXY = `SELECT id FROM routes_vertices_pgr ORDER BY ST_Distance(ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326), the_geom) ASC LIMIT 1`
 	const nodesFromBateaux = `SELECT array_agg(nearest_node) FROM bateaux WHERE nearest_node IS NOT NULL`
 	const query = `
@@ -62,10 +63,17 @@ function buildRoutingQuery(lon, lat) {
 
 // COMMANDS
 
-async function createBateau (classe, nom) {
-	let sql = "INSERT INTO bateaux VALUES (DEFAULT, :nom, :classe, NULL) RETURNING id;"
-	const bateau = await sequelize.query(sql, { replacements: { nom, classe }, type: QueryTypes.INSERT }).then((r) => { return Bateau.findByPk(r[0][0].id) })
-	return bateau
+async function creerBateau (nomClasse, nomBateau) {
+	// On vérifie l'existence de la classe
+	const classe = await getClasse(nomClasse)
+	if (classe) {
+	// On crée la bateau
+		const bateauSql = "INSERT INTO bateaux VALUES (DEFAULT, :nomBateau, :nomClasse, NULL) RETURNING id;"
+		const bateau = await sequelize.query(bateauSql, { replacements: { nomBateau, nomClasse }, type: QueryTypes.INSERT }).then((r) => { return getBateau(r[0][0].id) })
+		return bateau
+	} else {
+		return null
+	}
 }
 
 async function deplacerBateau (idBateau, lon, lat) {
@@ -77,7 +85,7 @@ async function deplacerBateau (idBateau, lon, lat) {
 	const nearestNode = await sequelize.query(nearestNodeSql, { replacements: { lon, lat }, type: QueryTypes.SELECT }).then((nodes) => { return nodes[0].id })
 	// On met à jour la position et le nearest_node du bateau
 	const bateauSql = "UPDATE bateaux SET geom = ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), nearest_node = :nearestNode WHERE id = :idBateau"
-	const bateau = await sequelize.query(bateauSql, { replacements: { idBateau, lon, lat, nearestNode }, type: QueryTypes.UPDATE }).then(() => { return Bateau.findByPk(idBateau) })
+	const bateau = await sequelize.query(bateauSql, { replacements: { idBateau, lon, lat, nearestNode }, type: QueryTypes.UPDATE }).then(() => { return getBateau(idBateau) })
 	// On crée le trajet qui relie l'ancienne position et le bateau
 	let trajetGeom = 'NULL'
 	if (oldNearestNode) {
@@ -101,11 +109,11 @@ async function rentrerBateau (idBateau) {
 	return bateau
 }
 
-async function deleteBateau(id) {
+async function supprimerBateau (id) {
 	const deleted = await Bateau.destroy({ where: { id } })
 	return deleted
 }
 
 // EXPORTS
 
-module.exports = { getBateaux, getBateau, createBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, deleteBateau }
+module.exports = { getBateaux, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau }

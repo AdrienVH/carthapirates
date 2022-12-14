@@ -16,11 +16,6 @@ const Classe = sequelize.define('Classe', {
 
 // QUERIES
 
-async function getClasses () {
-	const classes = await Classe.findAll()
-	return classes
-}
-
 async function getClasse (nom) {
 	const classe = await Classe.findOne({ where: { nom } })
 	return classe
@@ -28,17 +23,23 @@ async function getClasse (nom) {
 
 // COMMANDS
 
-async function createClasse(nom) {
-	const sql = "INSERT INTO classes VALUES (DEFAULT, :nom);"
-	const classe = await sequelize.query(sql, { replacements: { nom }, type: QueryTypes.INSERT }).then(() => { return Classe.findOne({ where: { nom } }) })
-	return classe
+async function creerClasse (nom) {
+	// On vérifie qu'une classe ne porte pas déjà ce nom
+	const classeExistante = await getClasse(nom)
+	if (classeExistante) {
+		return null
+	} else {
+		const sql = "INSERT INTO classes VALUES (DEFAULT, :nom);"
+		const classe = await sequelize.query(sql, { replacements: { nom }, type: QueryTypes.INSERT }).then(() => { return getClasse(nom) })
+		return classe
+	}
 }
 
-async function deleteClasse(nom) {
+async function deleteClasse (nom) {
 	const deleted = await Classe.destroy({ where: { nom } })
 	return deleted
 }
 
 // EXPORTS
 
-module.exports = { getClasses, getClasse, createClasse, deleteClasse }
+module.exports = { getClasse, creerClasse, deleteClasse }

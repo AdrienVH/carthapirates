@@ -1,7 +1,7 @@
-const { getBateaux, getBateau, createBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, deleteBateau } = require('./crud/bateaux')
+const { getBateaux, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const { getTrajets, getTrajetsBateau, deleteTrajets } = require('./crud/trajets')
-const { getClasses, getClasse, createClasse, deleteClasse } = require('./crud/classes')
+const { getClasse, creerClasse, deleteClasse } = require('./crud/classes')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -23,7 +23,7 @@ const SwaggerOptions = { customCss: '.curl-command { display: none }' }
 api.use(express.json())
 api.use(cors())
 api.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions))
-api.listen(8080, () => { console.log(`L'API REST est démarréeREST API is up`) })
+api.listen(8080, () => { console.log(`L'API REST est démarrée`) })
 
 // SSE
 
@@ -73,11 +73,17 @@ api.get('/bateaux', async (req, res) => {
  *     responses:
  *       200:
  *         description: Le bateau a bien été récupéré
+ *       404:
+ *         description: Aucun bateau ne porte l'identifiant {identifiant}
  */
 api.get('/bateaux/:identifiant', async (req, res) => {
 	const idBateau = parseInt(req.params.identifiant)
 	const bateau = await getBateau(idBateau)
-	res.status(200).json(bateau)
+	if (bateau) {
+		res.status(200).json(bateau)
+	} else {
+		res.status(404).json({ code: 404, erreurs: [`Aucun bateau ne porte l'identifiant ${idBateau}`] })
+	}
 })
 
 /**
@@ -90,12 +96,12 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: classe
- *         description: Nom de la classe du bateau à créer
+ *       - name: nomClasse
+ *         description: Nom de la classe pour laquelle le bateau doit être créé
  *         in: query
  *         required: true
  *         type: string
- *       - name: nom
+ *       - name: nomBateau
  *         description: Nom du bateau à créer
  *         in: query
  *         required: true
@@ -103,15 +109,21 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *     responses:
  *       201:
  *         description: Le bateau a bien été créé
+ *       400:
+ *         description: Aucune classe ne porte le nom {nomClasse}
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/bateaux/', async (req, res) => {
+api.post('/bateaux', async (req, res) => {
 	try {
-		const classe = req.query.classe
-		const nom = req.query.nom
-		const bateau = await createBateau(classe, nom)
-		res.status(201).json(bateau)
+		const nomClasse = req.query.nomClasse
+		const nomBateau = req.query.nomBateau
+		const bateau = await creerBateau(nomClasse, nomBateau)
+		if (bateau) {
+			res.status(201).json(bateau)
+		} else {
+			res.status(400).json({ code: 400, erreurs: [`Aucune classe ne porte le nom ${nomClasse}`] })
+		}
 	} catch (err) {
 		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
 		res.status(500).json({ code: 500, erreurs })
@@ -200,16 +212,17 @@ api.put('/bateaux/:identifiant', async (req, res) => {
  *         type: integer
  *     responses:
  *       200:
- *         description: Le bateau a bien été supprimé
+ *         description: Le bateau {identifiant} a bien été supprimé
  *       404:
  *         description: Aucun bateau n'a été supprimé
  */
 api.delete('/bateaux/:identifiant', async (req, res) => {
-	const deleted = await deleteBateau(req.params.identifiant)
+	const identifiant = parseInt(req.params.identifiant)
+	const deleted = await supprimerBateau(identifiant)
 	if(deleted == 1){
-		res.status(200).json("Le bateau a bien été supprimé")
+		res.status(200).json(`Le bateau ${identifiant} a bien été supprimé`)
 	}else{
-		res.status(404).json("Aucun bateau n'a été supprimé")
+		res.status(404).json(`Aucun bateau n'a été supprimé`)
 	}
 })
 
@@ -290,10 +303,17 @@ api.get('/ports', async (req, res) => {
  *     responses:
  *       200:
  *         description: Le port a bien été récupéré
+ *       404:
+ *         description: Aucun port ne porte l'identifiant {identifiant}
  */
 api.get('/ports/:identifiant', async (req, res) => {
-	const port = await getPort(req.params.identifiant)
-	res.status(200).json(port)
+	const idPort = parseInt(req.params.identifiant)
+	const port = await getPort(idPort)
+	if (port) {
+		res.status(200).json(port)
+	} else {
+		res.status(404).json({ code: 404, erreurs: [`Aucun port ne porte l'identifiant ${idPort}`] })
+	}
 })
 
 /**
@@ -335,8 +355,8 @@ api.post('/ports', async (req, res) => {
 		const port = await createPort(nom, longitude, latitude)
 		res.status(201).json(port)
 		sse.send({ type: 'nouveauPort', content: { port } })
-	} catch (error) {
-		const erreurs = error.errors.map(err => err.message);
+	} catch (err) {
+		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
 		res.status(500).json({ code: 500, erreurs })
 	}
 })
@@ -452,15 +472,19 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  api.get('/trajets/bateau/:identifiant', async (req, res) => {
 	const idBateau = parseInt(req.params.identifiant)
 	const trajets = await getTrajetsBateau(idBateau)
-	res.status(200).json(trajets)
+	if (trajets) {
+		res.status(200).json(trajets)
+	} else {
+		res.status(404).json(trajets)
+	}
 })
 
 /**
  * @swagger
  *
- * /trajets/{identifiant}:
+ * /trajets/bateau/{identifiant}:
  *   delete:
- *     description: Supprime les trajets d'un bateau
+ *     description: Supprime les trajets d'un bateau (suppression logique)
  *     tags: [Trajets]
  *     produces:
  *       - application/json
@@ -476,13 +500,13 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  *       404:
  *         description: Aucun trajet n'a été supprimé
  */
- api.delete('/trajets/:identifiant', async (req, res) => {
+ api.delete('/trajets/bateau/:identifiant', async (req, res) => {
 	const idBateau = req.params.identifiant
 	const deleted = await deleteTrajets(idBateau)
 	if (deleted > 0) {
 		res.status(200).json("Les " + deleted + " trajets du bateau " + idBateau + " ont bien été supprimés")
 	} else {
-		res.status(200).json("Aucun trajet n'a été supprimé")
+		res.status(404).json({ code: 404, erreurs: [`Aucun trajet n'a été supprimé`] })
 	}
 })
 
@@ -496,25 +520,7 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
 /**
  * @swagger
  *
- * /classes:
- *   get:
- *     description: Récupère la liste des classes
- *     tags: [Classes]
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: La liste des classes a bien été récupérée
- */
- api.get('/classes', async (req, res) => {
-	const classes = await getClasses()
-	res.status(200).json(classes)
-})
-
-/**
- * @swagger
- *
- * /classes/{nom}:
+ * /classe/{nom}:
  *   get:
  *     description: Récupère une classe
  *     tags: [Classes]
@@ -530,29 +536,29 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  *       200:
  *         description: La classe a bien été récupérée
  *       404:
- *         description: Aucune classe ne porte ce nom
+ *         description: Aucune classe ne porte le nom {nom}
  */
- api.get('/classes/:nom', async (req, res) => {
+ api.get('/classe/:nom', async (req, res) => {
 	const nom = req.params.nom
 	const classe = await getClasse(nom)
 	if (classe) {
 		res.status(200).json(classe)
 	} else {
-		res.status(404).json({ code: 404, erreurs: ['Aucune classe ne porte ce nom'] })
+		res.status(404).json({ code: 404, erreurs: [`Aucune classe ne porte le nom ${nom}`] })
 	}
 })
 
 /**
  * @swagger
  *
- * /classes:
+ * /classe:
  *   post:
  *     description: Crée une classe
  *     tags: [Classes]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: nom
+ *       - name: nomClasse
  *         description: Nom de la classe à créer
  *         in: query
  *         required: true
@@ -560,16 +566,22 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  *     responses:
  *       201:
  *         description: La classe a bien été créée
+ *       400:
+ *         description: Une classe porte déjà le nom {nomClasse}
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/classes', async (req, res) => {
+api.post('/classe', async (req, res) => {
 	try {
-		const nom = req.query.nom
-		const classe = await createClasse(nom)
-		res.status(201).json(classe)
-	} catch (error) {
-		const erreurs = error.errors.map(err => err.message);
+		const nomClasse = req.query.nomClasse
+		const classe = await creerClasse(nomClasse)
+		if (classe) {
+			res.status(201).json(classe)
+		} else {
+			res.status(400).json({ code: 400, erreurs: [`Une classe porte déjà le nom ${nomClasse}`] })
+		}
+	} catch (err) {
+		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
 		res.status(500).json({ code: 500, erreurs })
 	}
 })
@@ -577,7 +589,7 @@ api.post('/classes', async (req, res) => {
 /**
  * @swagger
  *
- * /classes/{nom}:
+ * /classe/{nom}:
  *   delete:
  *     description: Supprime une classe
  *     tags: [Classes]
@@ -595,11 +607,11 @@ api.post('/classes', async (req, res) => {
  *       404:
  *         description: Aucune classe n'a été supprimée
  */
- api.delete('/classes/:nom', async (req, res) => {
+ api.delete('/classe/:nom', async (req, res) => {
 	const deleted = await deleteClasse(req.params.nom)
-	if(deleted == 1){
+	if (deleted == 1) {
 		res.status(200).json("La classe a bien été supprimée")
-	}else{
-		res.status(404).json("Aucune classe n'a été supprimée")
+	} else {
+		res.status(404).json({ code: 404, erreurs: [`Aucune classe n'a été supprimée`] })
 	}
 })
