@@ -121,6 +121,7 @@ api.post('/bateaux', async (req, res) => {
 		const bateau = await creerBateau(nomClasse, nomBateau)
 		if (bateau) {
 			res.status(201).json(bateau)
+			sse.send({ type: 'nouveauBateau', content: { bateau } })
 		} else {
 			res.status(400).json({ code: 400, erreurs: [`Aucune classe ne porte le nom ${nomClasse}`] })
 		}

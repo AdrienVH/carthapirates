@@ -271,6 +271,12 @@ eventSource.onmessage = event => {
 			// Toaster
 			toaster(`Le port n°${port.id} a bien été ajouté à la carte`)
 			break
+		case 'nouveauBateau':
+			const nouveauBateau = data.content.bateau
+			addBateauToMap(nouveauBateau)
+			// Toaster
+			toaster(`Le bateau n°${nouveauBateau.id} a bien été ajouté à la carte`)
+			break
 		default:
 			console.log("UNHANDLED EVENT")
 			break
