@@ -1,7 +1,7 @@
 const { getBateaux, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const { getTrajets, getTrajetsBateau, supprimerTrajets } = require('./crud/trajets')
-const { getClasse, creerClasse, deleteClasse } = require('./crud/classes')
+const { getFlotte, creerFlotte, deleteFlotte } = require('./crud/flottes')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -103,8 +103,8 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: nomClasse
- *         description: Nom de la classe pour laquelle le bateau doit être créé
+ *       - name: nomFlotte
+ *         description: Nom de la flotte pour laquelle le bateau doit être créé
  *         in: query
  *         required: true
  *         type: string
@@ -117,20 +117,20 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *       201:
  *         description: Le bateau a bien été créé
  *       400:
- *         description: Aucune classe ne porte le nom {nomClasse}
+ *         description: Aucune flotte ne porte le nom {nomFlotte}
  *       500:
  *         description: Une erreur est survenue
  */
 api.post('/bateaux', async (req, res) => {
 	try {
-		const nomClasse = req.query.nomClasse
+		const nomFlotte = req.query.nomFlotte
 		const nomBateau = req.query.nomBateau
-		const bateau = await creerBateau(nomClasse, nomBateau)
+		const bateau = await creerBateau(nomFlotte, nomBateau)
 		if (bateau) {
 			res.status(201).json(bateau)
 			sse.send({ type: 'nouveauBateau', content: { bateau } })
 		} else {
-			res.status(400).json({ code: 400, erreurs: [`Aucune classe ne porte le nom ${nomClasse}`] })
+			res.status(400).json({ code: 400, erreurs: [`Aucune flotte ne porte le nom ${nomFlotte}`] })
 		}
 	} catch (err) {
 		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
@@ -562,71 +562,71 @@ api.get('/ports/:nombre/proches', async (req, res) => {
  * @swagger
  *
  * tags:
- *  name: Classes
+ *  name: Flottes
  */
 
 /**
  * @swagger
  *
- * /classe/{nom}:
+ * /flotte/{nom}:
  *   get:
- *     description: Récupère une classe
- *     tags: [Classes]
+ *     description: Récupère une flotte
+ *     tags: [Flottes]
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: nom
- *         description: Nom de la classe
+ *         description: Nom de la flotte
  *         in: path
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: La classe a bien été récupérée
+ *         description: La flotte a bien été récupérée
  *       404:
- *         description: Aucune classe ne porte le nom {nom}
+ *         description: Aucune flotte ne porte le nom {nom}
  */
- api.get('/classe/:nom', async (req, res) => {
+ api.get('/flotte/:nom', async (req, res) => {
 	const nom = req.params.nom
-	const classe = await getClasse(nom)
-	if (classe) {
-		res.status(200).json(classe)
+	const flotte = await getFlotte(nom)
+	if (flotte) {
+		res.status(200).json(flotte)
 	} else {
-		res.status(404).json({ code: 404, erreurs: [`Aucune classe ne porte le nom ${nom}`] })
+		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nom}`] })
 	}
 })
 
 /**
  * @swagger
  *
- * /classe:
+ * /flotte:
  *   post:
- *     description: Crée une classe
- *     tags: [Classes]
+ *     description: Crée une flotte
+ *     tags: [Flottes]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: nomClasse
- *         description: Nom de la classe à créer
+ *       - name: nomFlotte
+ *         description: Nom de la flotte à créer
  *         in: query
  *         required: true
  *         type: string
  *     responses:
  *       201:
- *         description: La classe a bien été créée
+ *         description: La flotte a bien été créée
  *       400:
- *         description: Une classe porte déjà le nom {nomClasse}
+ *         description: Une flotte porte déjà le nom {nomFlotte}
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/classe', async (req, res) => {
+api.post('/flotte', async (req, res) => {
 	try {
-		const nomClasse = req.query.nomClasse
-		const classe = await creerClasse(nomClasse)
-		if (classe) {
-			res.status(201).json(classe)
+		const nomFlotte = req.query.nomFlotte
+		const flotte = await creerFlotte(nomFlotte)
+		if (flotte) {
+			res.status(201).json(flotte)
 		} else {
-			res.status(400).json({ code: 400, erreurs: [`Une classe porte déjà le nom ${nomClasse}`] })
+			res.status(400).json({ code: 400, erreurs: [`Une flotte porte déjà le nom ${nomFlotte}`] })
 		}
 	} catch (err) {
 		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
@@ -637,29 +637,29 @@ api.post('/classe', async (req, res) => {
 /**
  * @swagger
  *
- * /classe/{nom}:
+ * /flotte/{nom}:
  *   delete:
- *     description: Supprime une classe
- *     tags: [Classes]
+ *     description: Supprime une flotte
+ *     tags: [Flottes]
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: nom
- *         description: Nom de la classe
+ *         description: Nom de la flotte
  *         in: path
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: La classe a bien été supprimée
+ *         description: La flotte a bien été supprimée
  *       404:
- *         description: Aucune classe n'a été supprimée
+ *         description: Aucune flotte n'a été supprimée
  */
- api.delete('/classe/:nom', async (req, res) => {
-	const deleted = await deleteClasse(req.params.nom)
+ api.delete('/flotte/:nom', async (req, res) => {
+	const deleted = await deleteFlotte(req.params.nom)
 	if (deleted == 1) {
-		res.status(200).json("La classe a bien été supprimée")
+		res.status(200).json("La flotte a bien été supprimée")
 	} else {
-		res.status(404).json({ code: 404, erreurs: [`Aucune classe n'a été supprimée`] })
+		res.status(404).json({ code: 404, erreurs: [`Aucune flotte n'a été supprimée`] })
 	}
 })

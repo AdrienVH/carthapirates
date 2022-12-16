@@ -2,10 +2,10 @@ DROP TABLE IF EXISTS bateaux;
 CREATE TABLE bateaux (
     id serial CONSTRAINT pkey_bateaux_id PRIMARY KEY,
     nom text NOT NULL,
-    nom_classe text NOT NULL,
+    nom_flotte text NOT NULL,
     geom geometry(POINT, 4326),
     nearest_node integer,
-    CONSTRAINT fkey_bateaux_classes FOREIGN KEY(nom_classe) REFERENCES classes(nom) ON DELETE CASCADE
+    CONSTRAINT fkey_bateaux_flottes FOREIGN KEY(nom_flotte) REFERENCES flottes(nom) ON DELETE CASCADE
 );
 
 -- Enseignants

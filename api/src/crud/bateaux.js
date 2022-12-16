@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes, QueryTypes } = require('sequelize')
 const { getTrajetsBateau } = require('./trajets')
-const { getClasse } = require('./classes')
+const { getFlotte } = require('./flottes')
 
 // DATABASE
 
@@ -63,13 +63,13 @@ function buildRoutingQuery (lon, lat) {
 
 // COMMANDS
 
-async function creerBateau (nomClasse, nomBateau) {
-	// On vérifie l'existence de la classe
-	const classe = await getClasse(nomClasse)
-	if (classe) {
+async function creerBateau (nomFlotte, nomBateau) {
+	// On vérifie l'existence de la flotte
+	const flotte = await getFlotte(nomFlotte)
+	if (flotte) {
 	// On crée la bateau
-		const bateauSql = "INSERT INTO bateaux VALUES (DEFAULT, :nomBateau, :nomClasse, NULL) RETURNING id;"
-		const bateau = await sequelize.query(bateauSql, { replacements: { nomBateau, nomClasse }, type: QueryTypes.INSERT }).then((r) => { return getBateau(r[0][0].id) })
+		const bateauSql = "INSERT INTO bateaux VALUES (DEFAULT, :nomBateau, :nomFlotte, NULL) RETURNING id;"
+		const bateau = await sequelize.query(bateauSql, { replacements: { nomBateau, nomFlotte }, type: QueryTypes.INSERT }).then((r) => { return getBateau(r[0][0].id) })
 		return bateau
 	} else {
 		return null
