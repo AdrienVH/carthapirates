@@ -36,13 +36,15 @@ class CarthaPirates(object):
     return response.json()["geom"]["coordinates"]
 
   def trouverPortsProchesCoords(self, coords, nombre):
-    url = self.url + "/ports/proches/" + str(nombre) + "/" + str(coords[0]) + "/" + str(coords[1])
-    response = requests.get(url)
+    url = self.url + "/ports/" + str(nombre) + "/proches"
+    params = { "longitude": coords[0], "latitude": coords[1] }
+    response = requests.get(url, params=params)
     return response.json()
 
   def trouverBateauxProchesCoords(self, coords, nombre):
-    url = self.url + "/bateaux/proches/" + str(nombre) + "/" + str(coords[0]) + "/" + str(coords[1])
-    response = requests.get(url)
+    url = self.url + "/bateaux/" + str(nombre) + "/proches"
+    params = { "longitude": coords[0], "latitude": coords[1] }
+    response = requests.get(url, params=params)
     return response.json()
 
   def rentrerMonBateau(self):

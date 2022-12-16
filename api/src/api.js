@@ -30,6 +30,13 @@ api.listen(8080, () => { console.log(`L'API REST est démarrée`) })
 const sse = new SSE()
 api.get('/stream', sse.init);
 
+// LIMITES
+
+const X_MIN = -5.345692512
+const X_MAX = 36.21615644
+const Y_MIN = 30.264715887
+const Y_MAX = 45.792425848
+
 /**
  * @swagger
  *
@@ -159,14 +166,20 @@ api.post('/bateaux', async (req, res) => {
  *     responses:
  *       201:
  *         description: La localisation du bateau a bien été modifiée
+ *       400:
+ *         description: Un bateau ne peut pas être placé en dehors de la Mer Méditerranée
  */
 api.put('/bateaux/:identifiant', async (req, res) => {
 	const idBateau = parseInt(req.params.identifiant)
-	const lon = parseFloat(req.query.longitude)
-	const lat = parseFloat(req.query.latitude)
-	const content = await deplacerBateau(idBateau, lon, lat)
-	res.status(201).json(content.bateau)
-	sse.send({ type: 'deplacerBateau', content })
+	const longitude = parseFloat(req.query.longitude)
+	const latitude = parseFloat(req.query.latitude)
+	if (longitude >= X_MIN && longitude <= X_MAX && latitude >= Y_MIN && latitude <= Y_MAX) {
+		const content = await deplacerBateau(idBateau, longitude, latitude)
+		res.status(201).json(content.bateau)
+		sse.send({ type: 'deplacerBateau', content })
+	} else {
+		res.status(400).json({ code: 400, erreurs: [`Un bateau ne peut pas être placé en dehors de la Mer Méditerranée`] })
+	}
 })
 
 /**
@@ -230,7 +243,7 @@ api.delete('/bateaux/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /bateaux/proches/{nombre}/{longitude}/{latitude}:
+ * /bateaux/{nombre}/proches:
  *   get:
  *     description: Récupère les bateaux les plus proches de coordonnées
  *     tags: [Bateaux]
@@ -244,21 +257,32 @@ api.delete('/bateaux/:identifiant', async (req, res) => {
  *         type: integer
  *       - name: longitude
  *         description: Longitude
- *         in: path
+ *         in: query
  *         required: true
  *         type: number
  *       - name: latitude
  *         description: Latitude
- *         in: path
+ *         in: query
  *         required: true
  *         type: number
  *     responses:
  *       200:
- *         description: Le bateau a bien été récupéré
+ *         description: Les {nombre} bateaux les plus proches ont bien été récupérés
+ *       400:
+ *         description: Votre recherche ne peut pas se situer en dehors de la Mer Méditerranée
  */
-api.get('/bateaux/proches/:nombre/:longitude/:latitude', async (req, res) => {
-	const bateaux = await getBateauxByLonLat(req.params.longitude, req.params.latitude, req.params.nombre)
-	res.status(200).json(bateaux)
+api.get('/bateaux/:nombre/proches', async (req, res) => {
+	const nombre = parseInt(req.params.nombre)
+	const longitude = parseFloat(req.query.longitude)
+	const latitude = parseFloat(req.query.latitude)
+	if (longitude < X_MIN || longitude > X_MAX || latitude < Y_MIN || latitude > Y_MAX) {
+		res.status(400).json({ code: 400, erreurs: [`Votre recherche ne peut pas se situer en dehors de la Mer Méditerranée`] })
+	} else if (isNaN(nombre) || nombre <= 0) {
+		res.status(400).json({ code: 400, erreurs: [`Le nombre de bateau recherchés doit être supérieur ou égal à 1`] })
+	} else {
+		const bateaux = await getBateauxByLonLat(longitude, latitude, nombre)
+		res.status(200).json(bateaux)
+	}
 })
 
  /**
@@ -345,6 +369,8 @@ api.get('/ports/:identifiant', async (req, res) => {
  *     responses:
  *       201:
  *         description: Le port a bien été créé
+ *       400:
+ *         description: Un port ne peut pas être placé en dehors de la Mer Méditerranée
  *       500:
  *         description: Une erreur est survenue
  */
@@ -354,8 +380,13 @@ api.post('/ports', async (req, res) => {
 		const latitude = req.query.latitude
 		const longitude = req.query.longitude
 		const port = await createPort(nom, longitude, latitude)
-		res.status(201).json(port)
-		sse.send({ type: 'nouveauPort', content: { port } })
+		if (longitude >= X_MIN && longitude <= X_MAX && latitude >= Y_MIN && latitude <= Y_MAX) {
+			const content = await deplacerBateau(idBateau, lon, lat)
+			res.status(201).json(port)
+			sse.send({ type: 'nouveauPort', content: { port } })
+		} else {
+			res.status(400).json({ code: 400, erreurs: [`Un port ne peut pas être placé en dehors de la Mer Méditerranée`] })
+		}
 	} catch (err) {
 		const erreurs = err.errors ? err.errors.map(err => err.message) : ['Erreur inconnue']
 		res.status(500).json({ code: 500, erreurs })
@@ -396,7 +427,7 @@ api.delete('/ports/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /ports/proches/{nombre}/{longitude}/{latitude}:
+ * /ports/{nombre}/proches:
  *   get:
  *     description: Récupère les ports les plus proches de coordonnées
  *     tags: [Ports]
@@ -410,21 +441,32 @@ api.delete('/ports/:identifiant', async (req, res) => {
  *         type: integer
  *       - name: longitude
  *         description: Longitude
- *         in: path
+ *         in: query
  *         required: true
  *         type: number
  *       - name: latitude
  *         description: Latitude
- *         in: path
+ *         in: query
  *         required: true
  *         type: number
  *     responses:
  *       200:
- *         description: Les ports ont bien été récupérés
+ *         description: Les {nombre} ports les plus proches ont bien été récupérés
+ *       400:
+ *         description: Votre recherche ne peut pas se situer en dehors de la Mer Méditerranée
  */
-api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
-	const ports = await getPortsByLonLat(req.params.longitude, req.params.latitude, req.params.nombre)
-	res.status(200).json(ports)
+api.get('/ports/:nombre/proches', async (req, res) => {
+	const nombre = parseInt(req.params.nombre)
+	const longitude = parseFloat(req.query.longitude)
+	const latitude = parseFloat(req.query.latitude)
+	if (longitude < X_MIN || longitude > X_MAX || latitude < Y_MIN || latitude > Y_MAX) {
+		res.status(400).json({ code: 400, erreurs: [`Votre recherche ne peut pas se situer en dehors de la Mer Méditerranée`] })
+	} else if (isNaN(nombre) || nombre <= 0) {
+		res.status(400).json({ code: 400, erreurs: [`Le nombre de ports recherchés doit être supérieur ou égal à 1`] })
+	} else {
+		const ports = await getPortsByLonLat(longitude, latitude, nombre)
+		res.status(200).json(ports)
+	}
 })
 
 /**
@@ -498,7 +540,7 @@ api.get('/ports/proches/:nombre/:longitude/:latitude', async (req, res) => {
  *         type: integer
  *     responses:
  *       200:
- *         description: Le ou les trajets du bateau ont bien été supprimés
+ *         description: Les trajets du bateau ont bien été supprimés
  *       404:
  *         description: Aucun trajet n'a été supprimé
  *       500:

@@ -40,13 +40,15 @@ class CarthaPirates {
     }
 
     async trouverPortsProchesCoords(coords, nombre) {
-        const url = this.url + '/ports/proches/' + nombre + '/' + coords[0] + '/' + coords[1]
+        const params = new URLSearchParams({ longitude: coords[0], latitude: coords[1] })
+        const url = this.url + '/ports/' + nombre + '/proches?' + params
         const response = await fetch(url)
         return await response.json()
     }
 
     async trouverBateauxProchesCoords(coords, nombre) {
-        const url = this.url + '/bateaux/proches/' + nombre + '/' + coords[0] + '/' + coords[1]
+        const params = new URLSearchParams({ longitude: coords[0], latitude: coords[1] })
+        const url = this.url + '/bateaux/' + nombre + '/proches?' + params
         const response = await fetch(url)
         return await response.json()
     }
