@@ -1,0 +1,36 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+  - cron: "30 23 * * *"
+  workflow_dispatch:
+
+jobs:
+  build-carthapirates-db:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build de l'image carthapirates-db
+      run: docker build ./db --tag carthapirates-db:$(date +%s)
+  build-carthapirates-api:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build de l'image carthapirates-api
+      run: docker build ./api --tag carthapirates-api:$(date +%s)
+  build-carthapirates-front:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build de l'image carthapirates-front
+      run: docker build ./front --tag carthapirates-front:$(date +%s)
+  docker-compose-up:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Lancement de la composition
+      run: docker-compose up -d
