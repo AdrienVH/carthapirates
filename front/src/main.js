@@ -2,7 +2,11 @@ const isProd = window.location.hostname == 'carthapirates.fr' ? true : false
 
 const API_BASE_URL = isProd ? 'https://carthapirates.fr/api' : 'http://localhost:9001'
 
-if (isProd) $('#ribbon').remove()
+if (isProd) {
+	$('#ribbon').remove()
+} else {
+	$('#ribbon').show()
+}
 
 let focusBateau = false
 let idBateau = null
