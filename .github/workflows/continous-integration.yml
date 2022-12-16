@@ -2,9 +2,9 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
   schedule:
   - cron: "30 23 * * *"
   workflow_dispatch:
@@ -33,4 +33,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Lancement de la composition
-      run: docker-compose up -d
+      run: docker-compose -f docker-compose.dev.yml up -d
