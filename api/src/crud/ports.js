@@ -25,7 +25,7 @@ async function getPorts () {
 
 async function getPort (id) {
 	const port = await Port.findByPk(id)
-	return port.toJSON()
+	return port
 }
 
 async function getPortsByLonLat(lon, lat, limit) {

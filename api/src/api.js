@@ -65,14 +65,14 @@ api.get('/bateaux', async (req, res) => {
 /**
  * @swagger
  *
- * /bateaux/{identifiant}:
+ * /bateau/{idBateau}:
  *   get:
  *     description: Récupère un bateau
  *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idBateau
  *         description: Identifiant du bateau
  *         in: path
  *         required: true
@@ -81,10 +81,10 @@ api.get('/bateaux', async (req, res) => {
  *       200:
  *         description: Le bateau a bien été récupéré
  *       404:
- *         description: Aucun bateau ne porte l'identifiant {identifiant}
+ *         description: Aucun bateau ne porte l'identifiant {idBateau}
  */
-api.get('/bateaux/:identifiant', async (req, res) => {
-	const idBateau = parseInt(req.params.identifiant)
+api.get('/bateau/:idBateau', async (req, res) => {
+	const idBateau = parseInt(req.params.idBateau)
 	const bateau = await getBateau(idBateau)
 	if (bateau) {
 		res.status(200).json(bateau)
@@ -96,7 +96,7 @@ api.get('/bateaux/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /bateaux:
+ * /bateau:
  *   post:
  *     description: Crée un bateau
  *     tags: [Bateaux]
@@ -121,7 +121,7 @@ api.get('/bateaux/:identifiant', async (req, res) => {
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/bateaux', async (req, res) => {
+api.post('/bateau', async (req, res) => {
 	try {
 		const nomFlotte = req.query.nomFlotte
 		const nomBateau = req.query.nomBateau
@@ -141,14 +141,14 @@ api.post('/bateaux', async (req, res) => {
 /**
  * @swagger
  *
- * /bateaux/{identifiant}:
+ * /bateau/{idBateau}/deplacer:
  *   put:
  *     description: Modifie la localisation d'un bateau
  *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idBateau
  *         description: Identifiant du bateau
  *         in: path
  *         required: true
@@ -169,8 +169,8 @@ api.post('/bateaux', async (req, res) => {
  *       400:
  *         description: Un bateau ne peut pas être placé en dehors de la Mer Méditerranée
  */
-api.put('/bateaux/:identifiant', async (req, res) => {
-	const idBateau = parseInt(req.params.identifiant)
+api.put('/bateau/:idBateau/deplacer', async (req, res) => {
+	const idBateau = parseInt(req.params.idBateau)
 	const longitude = parseFloat(req.query.longitude)
 	const latitude = parseFloat(req.query.latitude)
 	if (longitude >= X_MIN && longitude <= X_MAX && latitude >= Y_MIN && latitude <= Y_MAX) {
@@ -185,14 +185,14 @@ api.put('/bateaux/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /bateaux/{identifiant}/rentrer:
+ * /bateau/{idBateau}/rentrer:
  *   put:
  *     description: Retire la localisation d'un bateau
  *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idBateau
  *         description: Identifiant du bateau
  *         in: path
  *         required: true
@@ -201,8 +201,8 @@ api.put('/bateaux/:identifiant', async (req, res) => {
  *       201:
  *         description: La localisation du bateau a bien été retirée
  */
- api.put('/bateaux/:identifiant/rentrer', async (req, res) => {
-	const idBateau = parseInt(req.params.identifiant)
+ api.put('/bateau/:idBateau/rentrer', async (req, res) => {
+	const idBateau = parseInt(req.params.idBateau)
 	await rentrerBateau(idBateau)
 	await supprimerTrajets(idBateau)
 	res.status(201).json('Le bateau a bien été retiré')
@@ -212,29 +212,29 @@ api.put('/bateaux/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /bateaux/{identifiant}:
+ * /bateau/{idBateau}:
  *   delete:
  *     description: Supprime un bateau
  *     tags: [Bateaux]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idBateau
  *         description: Identifiant du bateau
  *         in: path
  *         required: true
  *         type: integer
  *     responses:
  *       200:
- *         description: Le bateau {identifiant} a bien été supprimé
+ *         description: Le bateau {idBateau} a bien été supprimé
  *       404:
  *         description: Aucun bateau n'a été supprimé
  */
-api.delete('/bateaux/:identifiant', async (req, res) => {
-	const identifiant = parseInt(req.params.identifiant)
-	const deleted = await supprimerBateau(identifiant)
+api.delete('/bateau/:idBateau', async (req, res) => {
+	const idBateau = parseInt(req.params.idBateau)
+	const deleted = await supprimerBateau(idBateau)
 	if (deleted == 1) {
-		res.status(200).json(`Le bateau ${identifiant} a bien été supprimé`)
+		res.status(200).json(`Le bateau ${idBateau} a bien été supprimé`)
 	} else {
 		res.status(404).json(`Aucun bateau n'a été supprimé`)
 	}
@@ -313,14 +313,14 @@ api.get('/ports', async (req, res) => {
 /**
  * @swagger
  *
- * /ports/{identifiant}:
+ * /port/{idPort}:
  *   get:
  *     description: Récupère un port
  *     tags: [Ports]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idPort
  *         description: Identifiant du port
  *         in: path
  *         required: true
@@ -329,10 +329,10 @@ api.get('/ports', async (req, res) => {
  *       200:
  *         description: Le port a bien été récupéré
  *       404:
- *         description: Aucun port ne porte l'identifiant {identifiant}
+ *         description: Aucun port ne porte l'identifiant {idPort}
  */
-api.get('/ports/:identifiant', async (req, res) => {
-	const idPort = parseInt(req.params.identifiant)
+api.get('/port/:idPort', async (req, res) => {
+	const idPort = parseInt(req.params.idPort)
 	const port = await getPort(idPort)
 	if (port) {
 		res.status(200).json(port)
@@ -344,14 +344,14 @@ api.get('/ports/:identifiant', async (req, res) => {
 /**
  * @swagger
  *
- * /ports:
+ * /port:
  *   post:
  *     description: Crée un port
  *     tags: [Ports]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: nom
+ *       - name: nomPort
  *         description: Nom du port à créer
  *         in: query
  *         required: true
@@ -374,11 +374,11 @@ api.get('/ports/:identifiant', async (req, res) => {
  *       500:
  *         description: Une erreur est survenue
  */
-api.post('/ports', async (req, res) => {
+api.post('/port', async (req, res) => {
 	try {
-		const nom = req.query.nom
-		const latitude = req.query.latitude
-		const longitude = req.query.longitude
+		const nomPort = req.query.nomPort
+		const latitude = parseFloat(req.query.latitude)
+		const longitude = parseFloat(req.query.longitude)
 		const port = await createPort(nom, longitude, latitude)
 		if (longitude >= X_MIN && longitude <= X_MAX && latitude >= Y_MIN && latitude <= Y_MAX) {
 			const content = await deplacerBateau(idBateau, lon, lat)
@@ -396,14 +396,14 @@ api.post('/ports', async (req, res) => {
 /**
  * @swagger
  *
- * /ports/{identifiant}:
+ * /port/{idPort}:
  *   delete:
  *     description: Supprime un port
  *     tags: [Ports]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idPort
  *         description: Identifiant du port
  *         in: path
  *         required: true
@@ -414,8 +414,8 @@ api.post('/ports', async (req, res) => {
  *       404:
  *         description: Aucun port n'a été supprimé
  */
-api.delete('/ports/:identifiant', async (req, res) => {
-	const idPort = parseInt(req.params.identifiant)
+api.delete('/port/:idPort', async (req, res) => {
+	const idPort = parseInt(req.params.idPort)
 	const deleted = await deletePort(idPort)
 	if (deleted == 1) {
 		res.status(200).json(`Le port ${idPort} a bien été supprimé`)
@@ -497,14 +497,14 @@ api.get('/ports/:nombre/proches', async (req, res) => {
 /**
  * @swagger
  *
- * /trajets/bateau/{identifiant}:
+ * /trajets/bateau/{idBateau}:
  *   get:
  *     description: Récupère les trajets d'un bateau
  *     tags: [Trajets]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idBateau
  *         description: Identifiant du bateau
  *         in: path
  *         required: true
@@ -513,8 +513,8 @@ api.get('/ports/:nombre/proches', async (req, res) => {
  *       200:
  *         description: Les trajets du bateau ont bien été récupérés
  */
- api.get('/trajets/bateau/:identifiant', async (req, res) => {
-	const idBateau = parseInt(req.params.identifiant)
+ api.get('/trajets/bateau/:idBateau', async (req, res) => {
+	const idBateau = parseInt(req.params.idBateau)
 	const trajets = await getTrajetsBateau(idBateau)
 	if (trajets) {
 		res.status(200).json(trajets)
@@ -526,14 +526,14 @@ api.get('/ports/:nombre/proches', async (req, res) => {
 /**
  * @swagger
  *
- * /trajets/bateau/{identifiant}:
+ * /trajets/bateau/{idBateau}:
  *   delete:
  *     description: Supprime les trajets d'un bateau
  *     tags: [Trajets]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: identifiant
+ *       - name: idBateau
  *         description: Identifiant du bateau
  *         in: path
  *         required: true
@@ -546,8 +546,8 @@ api.get('/ports/:nombre/proches', async (req, res) => {
  *       500:
  *         description: Une erreur est survenue
  */
- api.delete('/trajets/bateau/:identifiant', async (req, res) => {
-	const idBateau = parseInt(req.params.identifiant)
+ api.delete('/trajets/bateau/:idBateau', async (req, res) => {
+	const idBateau = parseInt(req.params.idBateau)
 	const deleted = await supprimerTrajets(idBateau)
 	if (deleted == 0) {
 		res.status(404).json({ code: 404, erreurs: [`Aucun trajet n'a été supprimé`] })
@@ -568,14 +568,14 @@ api.get('/ports/:nombre/proches', async (req, res) => {
 /**
  * @swagger
  *
- * /flotte/{nom}:
+ * /flotte/{nomFlotte}:
  *   get:
  *     description: Récupère une flotte
  *     tags: [Flottes]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: nom
+ *       - name: nomFlotte
  *         description: Nom de la flotte
  *         in: path
  *         required: true
@@ -584,29 +584,29 @@ api.get('/ports/:nombre/proches', async (req, res) => {
  *       200:
  *         description: La flotte a bien été récupérée
  *       404:
- *         description: Aucune flotte ne porte le nom {nom}
+ *         description: Aucune flotte ne porte le nom {nomFlotte}
  */
- api.get('/flotte/:nom', async (req, res) => {
-	const nom = req.params.nom
-	const flotte = await getFlotte(nom)
+ api.get('/flotte/:nomFlotte', async (req, res) => {
+	const nomFlotte = req.params.nomFlotte
+	const flotte = await getFlotte(nomFlotte)
 	if (flotte) {
 		res.status(200).json(flotte)
 	} else {
-		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nom}`] })
+		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nomFlotte}`] })
 	}
 })
 
 /**
  * @swagger
  *
- * /flotte/{nom}/bateaux:
+ * /flotte/{nomFlotte}/bateaux:
  *   get:
  *     description: Récupère les bateaux d'une flotte
  *     tags: [Flottes]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: nom
+ *       - name: nomFlotte
  *         description: Nom de la flotte
  *         in: path
  *         required: true
@@ -615,16 +615,16 @@ api.get('/ports/:nombre/proches', async (req, res) => {
  *       200:
  *         description: Les bateaux de la flotte ont bien été récupérés
  *       404:
- *         description: Aucune flotte ne porte le nom {nom}
+ *         description: Aucune flotte ne porte le nom {nomFlotte}
  */
- api.get('/flotte/:nom/bateaux', async (req, res) => {
-	const nom = req.params.nom
-	const flotte = await getFlotte(nom)
+ api.get('/flotte/:nomFlotte/bateaux', async (req, res) => {
+	const nomFlotte = req.params.nomFlotte
+	const flotte = await getFlotte(nomFlotte)
 	if (flotte) {
-		const bateaux = await getBateauxFlotte(nom)
+		const bateaux = await getBateauxFlotte(nomFlotte)
 		res.status(200).json(bateaux)
 	} else {
-		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nom}`] })
+		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nomFlotte}`] })
 	}
 })
 
@@ -669,14 +669,14 @@ api.post('/flotte', async (req, res) => {
 /**
  * @swagger
  *
- * /flotte/{nom}:
+ * /flotte/{nomFlotte}:
  *   delete:
  *     description: Supprime une flotte
  *     tags: [Flottes]
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: nom
+ *       - name: nomFlotte
  *         description: Nom de la flotte
  *         in: path
  *         required: true
@@ -687,8 +687,9 @@ api.post('/flotte', async (req, res) => {
  *       404:
  *         description: Aucune flotte n'a été supprimée
  */
- api.delete('/flotte/:nom', async (req, res) => {
-	const deleted = await deleteFlotte(req.params.nom)
+ api.delete('/flotte/:nomFlotte', async (req, res) => {
+	const nomFlotte = req.params.nomFlotte
+	const deleted = await deleteFlotte(nomFlotte)
 	if (deleted == 1) {
 		res.status(200).json("La flotte a bien été supprimée")
 	} else {
