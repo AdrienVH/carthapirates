@@ -23,18 +23,18 @@ class CarthaPirates {
 
     async deplacerMonBateauVersCoords(coords) {
         const params = new URLSearchParams({ longitude: coords[0], latitude: coords[1] })
-        const url = this.url + '/bateaux/' + this.monBateau + '?' + params
+        const url = this.url + '/bateau/' + this.monBateau + '/deplacer?' + params
         return fetch(url, { method: 'PUT'})
     }
 
     async recupererCoordsPort(idPort) {
-        const url = this.url + '/ports/' + idPort
+        const url = this.url + '/port/' + idPort
         const response = await fetch(url)
         return await response.json()
     }
 
     async recupererCoordsMonBateau() {
-        const url = this.url + '/bateaux/' + this.monBateau
+        const url = this.url + '/bateau/' + this.monBateau
         const response = await fetch(url)
         return await response.json()
     }
@@ -54,7 +54,7 @@ class CarthaPirates {
     }
 
     async rentrerMonBateau() {
-        const url = this.url + '/bateaux/' + this.monBateau + '/rentrer'
+        const url = this.url + '/bateau/' + this.monBateau + '/rentrer'
         return fetch(url, { method: 'PUT'})
     }
 }

@@ -21,17 +21,17 @@ class CarthaPirates(object):
     return response.json()
 
   def deplacerMonBateauVersCoords(self, coords):
-    url = self.url + '/bateaux/' + str(self.monBateau)
+    url = self.url + '/bateau/' + str(self.monBateau) + '/deplacer'
     params = { "longitude": coords[0], "latitude": coords[1] }
     requests.put(url, params=params)
 
   def recupererCoordsPort(self, idPort):
-    url = self.url + "/ports/" + str(idPort)
+    url = self.url + "/port/" + str(idPort)
     response = requests.get(url)
     return response.json()["geom"]["coordinates"]
 
   def recupererCoordsMonBateau(self):
-    url = self.url + "/bateaux/" +  str(self.monBateau)
+    url = self.url + "/bateau/" +  str(self.monBateau)
     response = requests.get(url)
     return response.json()["geom"]["coordinates"]
 
@@ -48,5 +48,5 @@ class CarthaPirates(object):
     return response.json()
 
   def rentrerMonBateau(self):
-    url = self.url + '/bateaux/' + str(self.monBateau) + '/rentrer'
+    url = self.url + '/bateau/' + str(self.monBateau) + '/rentrer'
     requests.put(url)
