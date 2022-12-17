@@ -13,24 +13,24 @@ jobs:
   build-carthapirates-db:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build de l'image carthapirates-db
       run: docker build ./db --tag carthapirates-db:$(date +%s)
   build-carthapirates-api:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build de l'image carthapirates-api
       run: docker build ./api --tag carthapirates-api:$(date +%s)
   build-carthapirates-front:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build de l'image carthapirates-front
       run: docker build ./front --tag carthapirates-front:$(date +%s)
   docker-compose-up:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Lancement de la composition
       run: docker-compose -f docker-compose.dev.yml up -d
