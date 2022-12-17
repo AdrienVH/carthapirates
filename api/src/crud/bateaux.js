@@ -25,6 +25,11 @@ async function getBateaux () {
 	return bateaux.map(function(bateau){ return bateau.toJSON() })
 }
 
+async function getBateauxFlotte (nomFlotte) {
+	const bateaux = await Bateau.findAll({ where: {'nom_flotte': nomFlotte }})
+	return bateaux
+}
+
 async function getBateau (id) {
 	const bateau = await Bateau.findByPk(id)
 	return bateau
@@ -116,4 +121,4 @@ async function supprimerBateau (id) {
 
 // EXPORTS
 
-module.exports = { getBateaux, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau }
+module.exports = { getBateaux, getBateauxFlotte, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau }

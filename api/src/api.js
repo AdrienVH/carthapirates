@@ -1,4 +1,4 @@
-const { getBateaux, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
+const { getBateaux, getBateauxFlotte, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
 const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
 const { getTrajets, getTrajetsBateau, supprimerTrajets } = require('./crud/trajets')
 const { getFlotte, creerFlotte, deleteFlotte } = require('./crud/flottes')
@@ -591,6 +591,38 @@ api.get('/ports/:nombre/proches', async (req, res) => {
 	const flotte = await getFlotte(nom)
 	if (flotte) {
 		res.status(200).json(flotte)
+	} else {
+		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nom}`] })
+	}
+})
+
+/**
+ * @swagger
+ *
+ * /flotte/{nom}/bateaux:
+ *   get:
+ *     description: Récupère les bateaux d'une flotte
+ *     tags: [Flottes]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: nom
+ *         description: Nom de la flotte
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Les bateaux de la flotte ont bien été récupérés
+ *       404:
+ *         description: Aucune flotte ne porte le nom {nom}
+ */
+ api.get('/flotte/:nom/bateaux', async (req, res) => {
+	const nom = req.params.nom
+	const flotte = await getFlotte(nom)
+	if (flotte) {
+		const bateaux = await getBateauxFlotte(nom)
+		res.status(200).json(bateaux)
 	} else {
 		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nom}`] })
 	}
