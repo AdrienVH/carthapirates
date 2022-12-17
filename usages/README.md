@@ -26,8 +26,6 @@ Enfin, créez votre bateau à l'aide du service `POST /bateaux`, en indiquant le
 
 **Notez bien l'identifiant de votre bateau !**
 
----
-
 # Pour continuer...
 
 Maintenant que vous avez votre bateau, il vous est possible de le faire interagir avec [la carte](https://carthapirates.fr/), toujours via l'API. La consommation des différents services offerts par l'API peut se faire de plusieurs manières différentes :

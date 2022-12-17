@@ -8,8 +8,6 @@ CarthaPirates est une application utilisée dans le cadre des cours d'Algorithmi
 
 ![](carte_interactive.png "Carte interactive")
 
----
-
 ## Vous souhaitez utiliser l'application ?
 
 L'API de CarthaPirates n'est pas sécurisée.
@@ -18,9 +16,7 @@ L'accès à son API est ouvert à tous (sous réserve que l'application soit act
 
 D'ailleurs, vous pouvez vérifier en temps réel l'état de l'application (et de son API) en consultant [status.carthapirates.fr](https://status.carthapirates.fr).
 
-Pour en savoir plus sur comment utiliser l'API de CarthaPirates, consultez le README du dossier [usages](./usages)  
-
----
+Pour en savoir plus sur comment utiliser l'API de CarthaPirates, consultez le README du dossier [usages](./usages)
 
 ## Vous administrez l'application ?
 
