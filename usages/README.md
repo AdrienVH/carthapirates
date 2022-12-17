@@ -1,23 +1,55 @@
-# Utilisation de l'API (Production)
+# Pour commencer...
 
-L'API de CarthaPirates n'est pas sécurisée. Si l'application est démarrée, l'accès à son API est ouvert à tous.
+## Vous êtes enseignant(e) ?
 
-Vous pouvez vérifier l'état de l'application et de son API via [status.carthapirates.fr](https://status.carthapirates.fr).
+Rendez-vous sur [carthapirates.fr/api/documentation/](https://carthapirates.fr/api/documentation/).
 
-## Via Swagger UI
+Créez une flotte pour votre classe à l'aide du service `POST /flotte`, en indiquant le nom de votre flotte.
 
-Il est possible de consommer l'API de CarthaPirates via Swagger UI.
+Vérifiez la création de votre flotte à l'aide du service `GET /flotte/{nom}`, en indiquant le nom de votre flotte.
 
-Pour ce faire, rendez vous sur [carthapirates.fr/api/documentation](https://carthapirates.fr/api/documentation/).
+Créez votre bateau à l'aide du service `POST /bateaux`, en indiquant le nom de votre flotte et le nom de votre bateau.
 
-## En Python
+**Notez bien l'identifiant de votre bateau !**
 
-Il est possible de consommer l'API de CarthaPirates depuis un client Python.
+Enfin, communiquez le nom de la flotte à vos étudiants, afin qu'ils puissent créer leur propre bateau.
 
-Pour ce faire, consultez le dossier [usages/python](./python) et son README.
+## Vous êtes étudiant(e) ?
 
-## En Javascript
+Récupérez, auprès de votre enseignant(e), le nom de la flotte créée pour votre classe.
 
-Il est possible de consommer l'API de CarthaPirates depuis un client Javascript.
+Rendez-vous sur [carthapirates.fr/api/documentation/](https://carthapirates.fr/api/documentation/).
 
-Pour ce faire, consultez le dossier [usages/javascript](./javascript) et son README.
+Vérifiez l'existence de cette flotte à l'aide du service `GET /flotte/{nom}`.
+
+Enfin, créez votre bateau à l'aide du service `POST /bateaux`, en indiquant le nom de votre flotte et le nom de votre bateau.
+
+**Notez bien l'identifiant de votre bateau !**
+
+---
+
+# Pour continuer...
+
+Maintenant que vous avez votre bateau, il vous est possible de le faire interagir avec [la carte](https://carthapirates.fr/), toujours via l'API. La consommation des différents services offerts par l'API peut se faire de plusieurs manières différentes :
+
+## En utilisant un client existant
+
+Vous pouvez continuer à utiliser les services de l'API depuis sa documentation (qui fait office de client) :
+[carthapirates.fr/api/documentation/](https://carthapirates.fr/api/documentation/)
+
+Mais vous pouvez aussi utiliser n'import quel client capable de faire des appels à une API.
+Postman, par exemple, ou encore CURL :
+
+```curl -s https://carthapirates.fr/api/bateaux | jq```
+
+```curl -s https://carthapirates.fr/api/ports | jq```
+
+## En construisant votre propre client
+
+### Grâce au langage Python
+
+Vous pouvez consulter un exemple d'implémentation en Python : [usages/python](./python)
+
+### Grâce au langage Javascript
+
+Vous pouvez consulter un exemple d'implémentation en Javascript : [usages/javascript](./javascript)
