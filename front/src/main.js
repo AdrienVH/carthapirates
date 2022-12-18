@@ -202,9 +202,7 @@ function addTrajetToMap(trajet, ordreMax) {
 	feature.set("idBateau", trajet.id_bateau)
 	feature.set("ordre", trajet.ordre)
 	feature.set("ordreMax", ordreMax)
-	if (trajet.geom) {
-		feature.setGeometry(new ol.format.GeoJSON().readGeometry(trajet.geom, { featureProjection: "EPSG:3857" }))
-	}
+	feature.setGeometry(trajet.geom ? new ol.format.GeoJSON().readGeometry(trajet.geom, { featureProjection: "EPSG:3857" }) : null)
 	trajetsSource.addFeature(feature)
 }
 
@@ -248,38 +246,61 @@ eventSource.onerror = () => {
 
 eventSource.onmessage = event => {
 	const data = JSON.parse(event.data)
-	console.log("EVENT " + data.type)
-	console.log(data.content)
-
+	console.log("EVENT " + data.type, data.content)
+	const content = data.content
 	switch (data.type) {
 		case 'deplacerBateau':
-			const bateau = data.content.bateau
-			const trajets = data.content.trajets
 			// Actions
-			moveBateau(bateau)
-			remplacerTrajets(bateau.id, trajets)
+			moveBateau(content.bateau)
+			remplacerTrajets(content.bateau.id, content.trajets)
 			// Toaster
-			toaster(`Le bateau n°${bateau.id} s'est déplacé vers ${bateau.geom.coordinates.join(', ')}`)
+			toaster(`Le bateau n°${content.bateau.id} s'est déplacé vers ${content.bateau.geom.coordinates.join(', ')}`)
 			break
 		case 'rentrerBateau':
-			const idBateau = data.content.idBateau
 			// Actions
-			bateauxSource.getFeatureById(idBateau).setGeometry(null)
-			retirerTrajets(idBateau)
+			bateauxSource.getFeatureById(content.idBateau).setGeometry(null)
+			retirerTrajets(content.idBateau)
 			// Toaster
-			toaster(`Le bateau n°${idBateau} et ses trajets ont été retirés de la carte`)
+			toaster(`Le bateau n°${content.idBateau} et ses trajets ont été retirés de la carte`)
 			break
 		case 'nouveauPort':
-			const port = data.content.port
-			addPortToMap(port)
+			addPortToMap(content.port)
 			// Toaster
-			toaster(`Le port n°${port.id} a bien été ajouté à la carte`)
+			toaster(`Le port n°${content.port.id} a été ajouté à la carte`)
 			break
 		case 'nouveauBateau':
-			const nouveauBateau = data.content.bateau
-			addBateauToMap(nouveauBateau)
+			addBateauToMap(content.bateau)
 			// Toaster
-			toaster(`Le bateau n°${nouveauBateau.id} a bien été ajouté à la carte`)
+			toaster(`Le bateau n°${content.bateau.id} a été ajouté à la carte`)
+			break
+		case 'supprimerBateau':
+			// Actions
+			bateauxSource.removeFeature(bateauxSource.getFeatureById(content.idBateau))
+			// Toaster
+			toaster(`Le bateau n°${content.idBateau} a été retiré de la carte`)
+			break
+		case 'supprimerPort':
+			// Actions
+			portsSource.removeFeature(portsSource.getFeatureById(content.idPort))
+			// Toaster
+			toaster(`Le port n°${content.idPort} a été retiré de la carte`)
+			break
+		case 'supprimerTrajets':
+			// Actions
+			retirerTrajets(content.idBateau)
+			// Toaster
+			toaster(`Les trajets du bateau n°${content.idBateau} ont été retirés de la carte`)
+			break
+		case 'supprimerFlotte':
+			if (content.idsBateaux.length > 0) {
+				// Actions
+				content.idsBateaux.forEach(idBateau => {
+					bateauxSource.removeFeature(bateauxSource.getFeatureById(idBateau))
+					retirerTrajets(idBateau)
+				})
+				// Toaster
+				toaster(`Les ${content.idsBateaux.length} bateaux (et leurs trajets) de la flotte ${content.nomFlotte} ont été retirés de la carte`)
+			}
 			break
 		default:
 			console.log("UNHANDLED EVENT")

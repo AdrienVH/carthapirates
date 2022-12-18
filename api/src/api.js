@@ -242,6 +242,7 @@ api.delete('/bateau/:idBateau', async (req, res) => {
 	const deleted = await supprimerBateau(idBateau)
 	if (deleted == 1) {
 		res.status(200).json(`Le bateau ${idBateau} a bien été supprimé`)
+		sse.send({ type: 'supprimerBateau', content: { idBateau } })
 	} else {
 		res.status(404).json(`Aucun bateau n'a été supprimé`)
 	}
@@ -426,6 +427,7 @@ api.delete('/port/:idPort', async (req, res) => {
 	const deleted = await deletePort(idPort)
 	if (deleted == 1) {
 		res.status(200).json(`Le port ${idPort} a bien été supprimé`)
+		sse.send({ type: 'supprimerPort', content: { idPort } })
 	} else {
 		res.status(404).json(`Aucun port n'a été supprimé`)
 	}
@@ -560,6 +562,7 @@ api.get('/ports/:nombre/proches', async (req, res) => {
 		res.status(404).json({ code: 404, erreurs: [`Aucun trajet n'a été supprimé`] })
 	} else if (deleted >= 1) {
 		res.status(200).json(`Les trajets (${deleted}) du bateau ${idBateau} ont bien été supprimés`)
+		sse.send({ type: 'supprimerTrajets', content: { idBateau } })
 	} else {
 		res.status(500).json({ code: 404, erreurs: [`Une erreur est survenue`] })
 	}
@@ -696,10 +699,18 @@ api.post('/flotte', async (req, res) => {
  */
  api.delete('/flotte/:nomFlotte', async (req, res) => {
 	const nomFlotte = req.params.nomFlotte
-	const deleted = await deleteFlotte(nomFlotte)
-	if (deleted == 1) {
-		res.status(200).json("La flotte a bien été supprimée")
+	const flotte = await getFlotte(nomFlotte)
+	if (flotte) {
+		const bateaux = await getBateauxFlotte(nomFlotte)
+		const idsBateaux = bateaux.map(b => b.id)
+		const deleted = await deleteFlotte(nomFlotte)
+		if (deleted == 1) {
+			res.status(200).json("La flotte a bien été supprimée")
+			sse.send({ type: 'supprimerFlotte', content: { nomFlotte, idsBateaux } })
+		} else {
+			res.status(404).json({ code: 404, erreurs: [`Aucune flotte n'a été supprimée`] })
+		}
 	} else {
-		res.status(404).json({ code: 404, erreurs: [`Aucune flotte n'a été supprimée`] })
+		res.status(404).json({ code: 404, erreurs: [`Aucune flotte ne porte le nom ${nomFlotte}`] })
 	}
 })
