@@ -21,6 +21,8 @@ services:
       - "traefik.http.routers.carthapirates_api.tls.certresolver=letsencrypt"
       - "traefik.http.middlewares.carthapirates_api-stripapiprefix.stripprefix.prefixes=/api"
       - "traefik.http.routers.carthapirates_api.middlewares=carthapirates_api-stripapiprefix@docker"
+    environment:
+      - ENV_NAME=prod
   db:
     build: ./db/
 networks:

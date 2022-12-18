@@ -8,6 +8,8 @@ services:
     build: ./api/
     ports:
       - "9001:8080"
+    environment:
+      - ENV_NAME=dev
   db:
     build: ./db/
     ports:

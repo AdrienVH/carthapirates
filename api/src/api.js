@@ -12,23 +12,30 @@ const api = express()
 
 const swaggerJSDocOptions = {
 	definition: {
-		info: { title: 'Documentation de l\'API de CarthaPirates', version: '1.0.0' },
-		servers: [{ url: "http://localhost:9001" }]
+		info: {
+			title: 'API de CarthaPirates',
+			description: `Documentation des services de l'API`,
+			version: '1.0.0'
+		},
+		servers: [
+			{ url: "http://localhost:9001", description: "Environnement de développement" },
+			{ url: "https://carthapirates.fr/api", description: "Environnement de production" }
+		]
 	},
 	apis: ['./src/api.js'],
 }
+swaggerJSDocOptions.definition.basePath = process.env.ENV_NAME == 'prod' ? '/api' : ''
 const swaggerSpec = swaggerJSDoc(swaggerJSDocOptions)
-const SwaggerOptions = { customCss: '.curl-command { display: none }' }
 
 api.use(express.json())
 api.use(cors())
-api.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec, SwaggerOptions))
+api.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 api.listen(8080, () => { console.log(`L'API REST est démarrée`) })
 
 // SSE
 
 const sse = new SSE()
-api.get('/stream', sse.init);
+api.get('/stream', sse.init)
 
 // LIMITES
 
