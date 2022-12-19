@@ -60,7 +60,7 @@ function buildRoutingQuery(lon, lat) {
 
 // COMMANDS
 
-async function createPort(nom, lon, lat) {
+async function creerPort(nom, lon, lat) {
 	// On recherche le node le plus proche de la position du port
 	const nearestNodeSql = `SELECT v.id FROM routes_vertices_pgr AS v ORDER BY v.the_geom <-> ST_SetSRID(ST_MakePoint(:lon, :lat), 4326) ASC LIMIT 1`
 	const nearestNode = await sequelize.query(nearestNodeSql, { replacements: { lon, lat }, type: QueryTypes.SELECT }).then((nodes) => { return nodes[0].id })
@@ -70,11 +70,11 @@ async function createPort(nom, lon, lat) {
 	return port
 }
 
-async function deletePort(id) {
+async function supprimerPort(id) {
 	const deleted = await Port.destroy({ where: { id } })
 	return deleted
 }
 
 // EXPORTS
 
-module.exports = { getPorts, getPort, createPort, getPortsByLonLat, deletePort }
+module.exports = { getPorts, getPort, creerPort, getPortsByLonLat, supprimerPort }

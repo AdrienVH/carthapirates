@@ -1,7 +1,7 @@
-const { getBateaux, getBateauxFlotte, getBateau, creerBateau, getBateauxByLonLat, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
-const { getPorts, getPort, createPort, getPortsByLonLat, deletePort } = require('./crud/ports')
+const { getBateaux, getBateauxFlotte, getBateau, getBateauxByLonLat, creerBateau, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
+const { getPorts, getPort, getPortsByLonLat, creerPort, supprimerPort } = require('./crud/ports')
 const { getTrajets, getTrajetsBateau, supprimerTrajets } = require('./crud/trajets')
-const { getFlotte, creerFlotte, deleteFlotte } = require('./crud/flottes')
+const { getFlotte, creerFlotte, supprimerFlotte } = require('./crud/flottes')
 const express = require('express')
 const cors = require('cors')
 const SSE = require('express-sse')
@@ -135,7 +135,7 @@ api.post('/bateau', async (req, res) => {
 		const bateau = await creerBateau(nomFlotte, nomBateau)
 		if (bateau) {
 			res.status(201).json(bateau)
-			sse.send({ type: 'nouveauBateau', content: { bateau } })
+			sse.send({ type: 'creerBateau', content: { bateau } })
 		} else {
 			res.status(400).json({ code: 400, erreurs: [`Aucune flotte ne porte le nom ${nomFlotte}`] })
 		}
@@ -387,11 +387,10 @@ api.post('/port', async (req, res) => {
 		const nomPort = req.query.nomPort
 		const latitude = parseFloat(req.query.latitude)
 		const longitude = parseFloat(req.query.longitude)
-		const port = await createPort(nom, longitude, latitude)
 		if (longitude >= X_MIN && longitude <= X_MAX && latitude >= Y_MIN && latitude <= Y_MAX) {
-			const content = await deplacerBateau(idBateau, lon, lat)
+			const port = await creerPort(nomPort, longitude, latitude)
 			res.status(201).json(port)
-			sse.send({ type: 'nouveauPort', content: { port } })
+			sse.send({ type: 'creerPort', content: { port } })
 		} else {
 			res.status(400).json({ code: 400, erreurs: [`Un port ne peut pas être placé en dehors de la Mer Méditerranée`] })
 		}
@@ -424,7 +423,7 @@ api.post('/port', async (req, res) => {
  */
 api.delete('/port/:idPort', async (req, res) => {
 	const idPort = parseInt(req.params.idPort)
-	const deleted = await deletePort(idPort)
+	const deleted = await supprimerPort(idPort)
 	if (deleted == 1) {
 		res.status(200).json(`Le port ${idPort} a bien été supprimé`)
 		sse.send({ type: 'supprimerPort', content: { idPort } })
@@ -703,7 +702,7 @@ api.post('/flotte', async (req, res) => {
 	if (flotte) {
 		const bateaux = await getBateauxFlotte(nomFlotte)
 		const idsBateaux = bateaux.map(b => b.id)
-		const deleted = await deleteFlotte(nomFlotte)
+		const deleted = await supprimerFlotte(nomFlotte)
 		if (deleted == 1) {
 			res.status(200).json("La flotte a bien été supprimée")
 			sse.send({ type: 'supprimerFlotte', content: { nomFlotte, idsBateaux } })

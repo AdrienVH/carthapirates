@@ -35,11 +35,11 @@ async function creerFlotte (nom) {
 	}
 }
 
-async function deleteFlotte (nom) {
+async function supprimerFlotte (nom) {
 	const deleted = await Flotte.destroy({ where: { nom } })
 	return deleted
 }
 
 // EXPORTS
 
-module.exports = { getFlotte, creerFlotte, deleteFlotte }
+module.exports = { getFlotte, creerFlotte, supprimerFlotte }

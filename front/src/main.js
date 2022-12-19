@@ -263,12 +263,12 @@ eventSource.onmessage = event => {
 			// Toaster
 			toaster(`Le bateau n°${content.idBateau} et ses trajets ont été retirés de la carte`)
 			break
-		case 'nouveauPort':
+		case 'creerPort':
 			addPortToMap(content.port)
 			// Toaster
 			toaster(`Le port n°${content.port.id} a été ajouté à la carte`)
 			break
-		case 'nouveauBateau':
+		case 'creerBateau':
 			addBateauToMap(content.bateau)
 			// Toaster
 			toaster(`Le bateau n°${content.bateau.id} a été ajouté à la carte`)

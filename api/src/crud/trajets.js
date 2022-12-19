@@ -10,8 +10,7 @@ const Trajet = sequelize.define('Trajet', {
 	id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true },
 	idBateau: { type: DataTypes.INTEGER, allowNull: false, field: 'id_bateau' },
 	date: { type: DataTypes.DATE },
-	geom: { type: DataTypes.GEOMETRY },
-	deleted: { type: DataTypes.BOOLEAN }
+	geom: { type: DataTypes.GEOMETRY }
 }, {
 	timestamps: false,
 	tableName: 'trajets'
