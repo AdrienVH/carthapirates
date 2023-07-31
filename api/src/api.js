@@ -1,5 +1,6 @@
 const { getBateaux, getBateauxFlotte, getBateau, getBateauxByLonLat, creerBateau, deplacerBateau, rentrerBateau, supprimerBateau } = require('./crud/bateaux')
-const { getPorts, getPort, getPortsByLonLat, creerPort, supprimerPort } = require('./crud/ports')
+const { getPorts, getPort, getPortsByLonLat, creerPort, supprimerPort, getTournee, getTourneeFixe } = require('./crud/ports')
+const { getRoutes } = require('./crud/routes')
 const { getTrajets, getTrajetsBateau, supprimerTrajets } = require('./crud/trajets')
 const { getFlotte, creerFlotte, supprimerFlotte } = require('./crud/flottes')
 const express = require('express')
@@ -475,6 +476,87 @@ api.get('/ports/:nombre/proches', async (req, res) => {
 		const ports = await getPortsByLonLat(longitude, latitude, nombre)
 		res.status(200).json(ports)
 	}
+})
+
+/**
+ * @swagger
+ *
+ * /tournee/{idPortDepart}/{idPortArrivee}:
+ *   get:
+ *     description: Calcule une tournée (ordre à optimiser)
+ *     tags: [Ports]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: idPortDepart
+ *         description: Identifiant du port de départ
+ *         in: path
+ *         required: true
+ *         type: integer
+ *       - name: idPortArrivee
+ *         description: Identifiant du port d'arrivée
+ *         in: path
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: La tournée a bien été calculée
+ */
+api.get('/tournee/:idPortDepart/:idPortArrivee', async (req, res) => {
+	const idPortDepart = parseInt(req.params.idPortDepart)
+	const idPortArrivee = parseInt(req.params.idPortArrivee)
+	const ports = await getTournee(idPortDepart, idPortArrivee, false)
+	res.status(200).json(ports)
+})
+
+/**
+ * @swagger
+ *
+ * /tournee/{idsPorts}:
+ *   get:
+ *     description: Calcule une tournée (ordre fixe)
+ *     tags: [Ports]
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: idsPorts
+ *         description: Identifiants des ports
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: La tournée a bien été calculée
+ */
+api.get('/tournee/:idsPorts', async (req, res) => {
+	const idsPorts = req.params.idsPorts
+	const ports = await getTourneeFixe(idsPorts)
+	res.status(200).json(ports)
+})
+
+/**
+ * @swagger
+ *
+ * tags:
+ *  name: Routes
+ */
+
+/**
+ * @swagger
+ *
+ * /routes:
+ *   get:
+ *     description: Récupère la liste des routes
+ *     tags: [Routes]
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: La liste des routes a bien été récupérée
+ */
+api.get('/routes', async (req, res) => {
+	const routes = await getRoutes()
+	res.status(200).json(routes)
 })
 
 /**

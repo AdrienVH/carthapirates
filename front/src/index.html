@@ -20,9 +20,23 @@
 		<div id="link">Pour interagir avec votre bateau, consultez <a href="https://github.com/adrienvh/carthapirates/tree/main/usages" target="_blank">ce lien</a></div>
 		<div id="stream"></div>
 		<div id="xy"></div>
+		<div id="choixPorts">
+			<select id="portDepart">
+				<option value="">Choix du port de départ</option>
+			</select>
+			<select id="portArrivee">
+				<option value="">Choix du port d'arrivée</option>
+			</select>
+		</div>
+		<div id="tournee">
+			<ul class="depart"></ul>
+			<ul class="sortable"></ul>
+			<ul class="arrivee"></ul>
+		</div>
 		<!-- JAVASCRIPT -->
 		<script src="jquery-3.6.1.min.js"></script>
 		<script src="https://openlayers.org/en/v6.3.1/build/ol.js"></script>
+		<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 		<script src="./main.js"></script>
 		<!-- JAVASCRIPT -->
 	</body>

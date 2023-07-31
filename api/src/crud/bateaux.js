@@ -56,7 +56,7 @@ function buildRoutingQuery (lon, lat) {
 	const query = `
 	SELECT end_vid AS bateau_node, MAX(agg_cost) AS distance
 	FROM pgr_dijkstra(
-		'SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM routes',
+		'SELECT ogc_fid AS id, source, target, distance AS cost FROM routes',
 		(${nearestNodeFromXY}),
 		(${nodesFromBateaux}),
 		FALSE
@@ -97,7 +97,7 @@ async function deplacerBateau (idBateau, lon, lat) {
 		trajetGeom = `
 		(
 		SELECT ST_ChaikinSmoothing(ST_LineMerge(ST_Union(wkb_geometry)), 5, true)
-		FROM pgr_dijkstra('SELECT ogc_fid AS id, source, target, distance / 1852 AS cost FROM routes', ${oldNearestNode}, ${nearestNode}, FALSE) AS pgr
+		FROM pgr_dijkstra('SELECT ogc_fid AS id, source, target, distance AS cost FROM routes', ${oldNearestNode}, ${nearestNode}, FALSE) AS pgr
 		LEFT JOIN routes AS r ON pgr.edge = r.ogc_fid
 		)
 		`

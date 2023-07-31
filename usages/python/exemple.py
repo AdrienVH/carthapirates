@@ -28,7 +28,7 @@ print("Les coordonnées du bateau sont", coords)
 # Pour rechercher les n ports à proximité de coordonnées
 portsProches = carthapirates.trouverPortsProchesCoords(coords, 5) # On réutilise les coordonnées du bateau
 for port in portsProches:
-  print(port["id"], ":", port["nom"], "(situé à", port["distance"], "milles nautiques du bateau)")
+  print(port["id"], ":", port["nom"], "(situé à", port["distance"], "mètres du bateau)")
 
 # Pour retirer le bateau et ses trajets de la carte à la fin de votre programme
 confirmation = input(colorer("Souhaitez-vous arrêter ? [Y/n] ", "rouge"))

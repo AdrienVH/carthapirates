@@ -38,7 +38,7 @@ function getPortsStyle(f){
 		text: new ol.style.Text({
 			offsetY: 1,
 			text: f.getId().toString(),
-			font: 'bold 12px sans-serif',
+			font: 'bold 9px sans-serif',
 			fill: new ol.style.Fill({color: 'white'})
 		})
 	})
@@ -99,10 +99,40 @@ const trajets = new ol.layer.Vector({
 	name: "trajets"
 })
 
+/***** ROUTES */
+
+function getRoutesStyle(){
+	return new ol.style.Style({
+		stroke: new ol.style.Stroke({ color: '#aaaaaa', width: 1 })
+	})
+}
+
+const routesSource = new ol.source.Vector({projection : 'EPSG:3857'})
+const routes = new ol.layer.Vector({
+	source: routesSource,
+	style: getRoutesStyle,
+	name: "routes"
+})
+
+/***** TOURNEES */
+
+function getTourneesStyle(){
+	return new ol.style.Style({
+		stroke: new ol.style.Stroke({ color: '#e0225b', width: 2 })
+	})
+}
+
+const tourneesSource = new ol.source.Vector({projection : 'EPSG:3857'})
+const tournees = new ol.layer.Vector({
+	source: tourneesSource,
+	style: getTourneesStyle,
+	name: "tournees"
+})
+
 /***** MAP */
 
 const map = new ol.Map({
-	layers: [mapbox, trajets, ports, bateaux],
+	layers: [mapbox, routes, tournees, trajets, ports, bateaux],
 	target: 'map',
 	view: new ol.View({
 		center: ol.proj.transform([6.0, 40.0], 'EPSG:4326', 'EPSG:3857'),
@@ -151,6 +181,8 @@ function addPortToMap(record) {
 	feature.set("nom", record.nom)
 	feature.setGeometry(new ol.geom.Point(ol.proj.transform(record.geom.coordinates, 'EPSG:4326','EPSG:3857')))
 	portsSource.addFeature(feature)
+	// Ajout aux listes déroulantes
+	$('#choixPorts select').append(`<option value="${record.id}">${record.id}. ${record.nom}</option>`)
 }
 
 getPorts()
@@ -158,7 +190,7 @@ getPorts()
 /************ GET BATEAUX */
 
 function getBateaux(){
-	const request = $.ajax({ url: API_BASE_URL + "/bateaux",method: "GET" })
+	const request = $.ajax({ url: API_BASE_URL + "/bateaux", method: "GET" })
 	request.done(function(bateaux) {
 		bateaux.forEach(bateau => addBateauToMap(bateau))
 	})
@@ -220,6 +252,120 @@ function remplacerTrajets(idBateau, trajets) {
 
 getTrajets()
 
+/************ GET ROUTES */
+
+function getRoutes(){
+	const request = $.ajax({ url: API_BASE_URL + "/routes", method: "GET" })
+	request.done(function(routes) {
+		addRoutesToMap(routes)
+	})
+	request.fail(function(jqXHR, textStatus) {
+		console.log("FAIL", jqXHR, textStatus)
+	})
+}
+
+function addRoutesToMap(routes) {
+	console.log(routes.length)
+	for (const route of routes) {
+		const feature = new ol.Feature({ })
+		feature.setGeometry(new ol.format.GeoJSON().readGeometry(route.geom, { featureProjection: "EPSG:3857" }))
+		routesSource.addFeature(feature)
+	}
+}
+
+/************ GET TOURNEE */
+
+function getTournee(idPortDepart, idPortArrivee){
+	const start = new Date().getTime()
+	const request = $.ajax({ url: API_BASE_URL + "/tournee/" + idPortDepart + "/" + idPortArrivee, method: "GET" })
+	request.done(function(routes) {
+		addTourneeToMap(routes, start, false)
+	})
+	request.fail(function(jqXHR, textStatus) {
+		console.log("FAIL", jqXHR, textStatus)
+	})
+}
+
+function getTourneeFixe(idsPorts){
+	const start = new Date().getTime()
+	const request = $.ajax({ url: API_BASE_URL + "/tournee/" + idsPorts, method: "GET" })
+	request.done(function(routes) {
+		addTourneeToMap(routes, start, true)
+	})
+	request.fail(function(jqXHR, textStatus) {
+		console.log("FAIL", jqXHR, textStatus)
+	})
+}
+
+function addTourneeToMap(routes, start, ajustement) {
+	const somme = Math.round(routes.map(r => parseFloat(r.distance)).reduce((acc, cur) => acc + cur, 0) / 1000)
+	// Feuille de Route
+	const oldSomme = parseInt($("#tournee").data("somme"))
+	$("#tournee").data("somme", somme)
+	$("#tournee ul li").remove()
+	$("#tournee ul.depart").append(`<li data-port="${routes[0].id_port_orig[0]}">${routes[0].id_port_orig[0]}. ${getNomPort(routes[0].id_port_orig[0])}</li>`)
+	for (const i in routes) {
+		let liste = "#tournee ul.sortable"
+		if (i == routes.length - 1) {
+			liste = "#tournee ul.arrivee"
+		}
+		const distance = Math.round(routes[i].distance / 1000)
+		const li = $(`<li data-port="${routes[i].id_port_dest[0]}">${routes[i].id_port_dest[0]}. ${getNomPort(routes[i].id_port_dest[0])} <span>${distance} kms</span></li>`).appendTo(liste)
+		// TODO survol
+	}
+	// Features
+	tourneesSource.clear()
+	for (const route of routes) {
+		const feature = new ol.Feature({ })
+		feature.set("route_id", route.route_id)
+		feature.set("distance", route.distance)
+		feature.set("id_port_orig", route.id_port_orig[0])
+		feature.set("id_port_dest", route.id_port_dest[0])
+		feature.setGeometry(new ol.format.GeoJSON().readGeometry(route.geom, { featureProjection: "EPSG:3857" }))
+		tourneesSource.addFeature(feature)
+	}
+	// Toaster
+	const message = []
+	if (ajustement) {
+		message.push(`Tournée réajustée à la main`)
+		message.push(`Distance totale : ${oldSomme} -> ${somme} kms`)
+		const difference = somme - oldSomme
+		const tauxVariation = Math.round(difference / oldSomme * 100)
+		message.push(`Différence : +${difference} kms, soit +${tauxVariation} %`)
+	} else {
+		message.push(`Tournée optimisée entre les ports ${routes[0].id_port_orig[0]} et ${routes[routes.length - 1].id_port_dest[0]}`)
+		message.push(`Distance totale : ${somme} kms`)
+	}
+	message.push(`Optimisation calculée et affichée en ${new Date().getTime() - start} ms`)
+	toaster(message.join('<br />'), 10000)
+}
+
+function getNomPort(idPort) {
+	return portsSource.getFeatureById(idPort).get("nom")
+}
+
+/************ EVENT LISTENERS */
+
+$("#choixPorts select").on('change', function() {
+	const portDepart = $("#portDepart").val()
+	const portArrivee = $("#portArrivee").val()
+	if (portDepart != "" && portArrivee != "") {
+		console.info(`Calcul d'itinéraire entre les ports ${portDepart} et ${portArrivee}`)
+		getTournee(portDepart, portArrivee)
+	} else {
+		console.info("Pas de calcul d'itinéraire")
+	}
+})
+
+$("#tournee ul.sortable").sortable({
+	axis: "y",
+	update: function() {
+		const idsPorts = []
+		$("#tournee ul li").each(function() { idsPorts.push($(this).data("port")) })
+		getTourneeFixe(idsPorts.join(','))
+    }
+})
+
 /************ SSE */
 
 const eventSource = new EventSource(API_BASE_URL + '/stream')
@@ -254,42 +400,42 @@ eventSource.onmessage = event => {
 			moveBateau(content.bateau)
 			remplacerTrajets(content.bateau.id, content.trajets)
 			// Toaster
-			toaster(`Le bateau n°${content.bateau.id} s'est déplacé vers ${content.bateau.geom.coordinates.join(', ')}`)
+			toaster(`Le bateau n°${content.bateau.id} s'est déplacé vers ${content.bateau.geom.coordinates.join(', ')}`, 5000)
 			break
 		case 'rentrerBateau':
 			// Actions
 			bateauxSource.getFeatureById(content.idBateau).setGeometry(null)
 			retirerTrajets(content.idBateau)
 			// Toaster
-			toaster(`Le bateau n°${content.idBateau} et ses trajets ont été retirés de la carte`)
+			toaster(`Le bateau n°${content.idBateau} et ses trajets ont été retirés de la carte`, 5000)
 			break
 		case 'creerPort':
 			addPortToMap(content.port)
 			// Toaster
-			toaster(`Le port n°${content.port.id} a été ajouté à la carte`)
+			toaster(`Le port n°${content.port.id} a été ajouté à la carte`, 5000)
 			break
 		case 'creerBateau':
 			addBateauToMap(content.bateau)
 			// Toaster
-			toaster(`Le bateau n°${content.bateau.id} a été ajouté à la carte`)
+			toaster(`Le bateau n°${content.bateau.id} a été ajouté à la carte`, 5000)
 			break
 		case 'supprimerBateau':
 			// Actions
 			bateauxSource.removeFeature(bateauxSource.getFeatureById(content.idBateau))
 			// Toaster
-			toaster(`Le bateau n°${content.idBateau} a été retiré de la carte`)
+			toaster(`Le bateau n°${content.idBateau} a été retiré de la carte`, 5000)
 			break
 		case 'supprimerPort':
 			// Actions
 			portsSource.removeFeature(portsSource.getFeatureById(content.idPort))
 			// Toaster
-			toaster(`Le port n°${content.idPort} a été retiré de la carte`)
+			toaster(`Le port n°${content.idPort} a été retiré de la carte`, 5000)
 			break
 		case 'supprimerTrajets':
 			// Actions
 			retirerTrajets(content.idBateau)
 			// Toaster
-			toaster(`Les trajets du bateau n°${content.idBateau} ont été retirés de la carte`)
+			toaster(`Les trajets du bateau n°${content.idBateau} ont été retirés de la carte`, 5000)
 			break
 		case 'supprimerFlotte':
 			if (content.idsBateaux.length > 0) {
@@ -299,7 +445,7 @@ eventSource.onmessage = event => {
 					retirerTrajets(idBateau)
 				})
 				// Toaster
-				toaster(`Les ${content.idsBateaux.length} bateaux (et leurs trajets) de la flotte ${content.nomFlotte} ont été retirés de la carte`)
+				toaster(`Les ${content.idsBateaux.length} bateaux (et leurs trajets) de la flotte ${content.nomFlotte} ont été retirés de la carte`, 5000)
 			}
 			break
 		default:
@@ -308,11 +454,11 @@ eventSource.onmessage = event => {
 	}
 }
 
-function toaster (texte) {
+function toaster (texte, duree) {
 	const message = $(`<div class="message"><p>${texte}</p></div>`).appendTo('#stream')
 	const div = $(`<div class="bar"></div>`).appendTo(message)
 	message.fadeIn(function() {
-		div.animate({ width: '100%' }, 5000, 'linear', function() { message.fadeOut() })
+		div.animate({ width: '100%' }, duree, 'linear', function() { message.fadeOut() })
 	})
 }
 
