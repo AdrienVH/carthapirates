@@ -95,6 +95,7 @@ body, html {
     left: 20px;
     display: flex;
     flex-direction: column;
+    display: none; /* Pour cacher temporairement la fonctionnalité d'optimisation de tournée*/
 }
 
 #choixPorts select {
