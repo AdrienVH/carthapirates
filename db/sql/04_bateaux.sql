@@ -9,14 +9,12 @@ CREATE TABLE bateaux (
 );
 
 -- Enseignants
-INSERT INTO bateaux VALUES (0,       'El Professor',                  'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (1, 'Los Profesores', 'm1geomatique2026', NULL);
 
 -- Etudiants
-INSERT INTO bateaux VALUES (DEFAULT, 'PimpMyBoat',                    'carthageo2023', NULL);
-INSERT INTO bateaux VALUES (DEFAULT, 'SQMer',                         'carthageo2023', NULL);
-INSERT INTO bateaux VALUES (DEFAULT, 'Guin''anne''s Revenge',         'carthageo2023', NULL);
-INSERT INTO bateaux VALUES (DEFAULT, 'L''Algonaute',                  'carthageo2023', NULL);
-INSERT INTO bateaux VALUES (DEFAULT, 'Le Pourfendeur de Bière',       'carthageo2023', NULL);
-INSERT INTO bateaux VALUES (DEFAULT, 'Pyrte-avion Charles de Gaulle', 'carthageo2023', NULL);
-INSERT INTO bateaux VALUES (DEFAULT, 'La Pynta',                      'carthageo2023', NULL);
-INSERT INTO bateaux VALUES (DEFAULT, 'πThon des Mers',                'carthageo2023', NULL);
+INSERT INTO bateaux VALUES (2, 'X', 'm1geomatique2026', NULL);
+INSERT INTO bateaux VALUES (3, 'X', 'm1geomatique2026', NULL);
+INSERT INTO bateaux VALUES (4, 'X', 'm1geomatique2026', NULL);
+INSERT INTO bateaux VALUES (5, 'X', 'm1geomatique2026', NULL);
+INSERT INTO bateaux VALUES (6, 'X', 'm1geomatique2026', NULL);
+INSERT INTO bateaux VALUES (7, 'X', 'm1geomatique2026', NULL);

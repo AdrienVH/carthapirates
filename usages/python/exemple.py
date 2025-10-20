@@ -1,5 +1,5 @@
 from CarthaPirates import CarthaPirates
-carthapirates = CarthaPirates(0) # Indiquez le numéro du bateau
+carthapirates = CarthaPirates(3) # Indiquez le numéro de votre bateau
 
 def colorer(message, couleur):
   couleurs = { "vert": "\033[92m", "rouge": "\033[91m", "normal": "\033[0m" }
